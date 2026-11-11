@@ -3,7 +3,7 @@
    ========================================================================== */
 
 // Configuración de la URL Base de tu API en AWS
-const API_BASE_URL = 'http://54.144.155.231:8000';
+const API_BASE_URL = 'https://baptist-swaziland-theorem-buy.trycloudflare.com';
 
 export const ApiService = {
   

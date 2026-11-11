@@ -2,7 +2,7 @@
    Módulo WebSocket (Gestión de Estado WSS en Tiempo Real)
    ========================================================================== */
 
-const WS_URL = 'ws://54.144.155.231:8000/ws/1';
+const WS_URL = 'wss://baptist-swaziland-theorem-buy.trycloudflare.com/ws/1';
 
 export class WebSocketService {
   constructor(onMessageCallback, onStatusChangeCallback) {
