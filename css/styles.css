@@ -1,0 +1,205 @@
+/* ==========================================================================
+   Estilos Retro-Minimalista Neón - Control IoT Excavadora RC
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+/* MODO OSCURO (Cyberpunk Retro Neon) */
+[data-bs-theme="dark"] {
+  --bg-main: #090c10;
+  --bg-grid: rgba(255, 204, 0, 0.05);
+  --header-bg: rgba(13, 17, 23, 0.95);
+  --card-bg: rgba(18, 22, 31, 0.85);
+  --card-border: #232936;
+  --text-main: #f0f6fc;
+  --text-muted: #8b949e;
+  
+  --neon-yellow: #ffcc00;
+  --neon-glow: rgba(255, 204, 0, 0.35);
+  --neon-red: #ff3344;
+  --neon-red-glow: rgba(255, 51, 68, 0.45);
+  --log-bg: #05070a;
+}
+
+/* MODO CLARO (Retro Tech Minimalist Neon) */
+[data-bs-theme="light"] {
+  --bg-main: #f4f6fb;
+  --bg-grid: rgba(217, 119, 6, 0.08);
+  --header-bg: rgba(255, 255, 255, 0.95);
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --card-border: #cbd5e1;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  
+  --neon-yellow: #d97706;
+  --neon-glow: rgba(217, 119, 6, 0.25);
+  --neon-red: #dc2626;
+  --neon-red-glow: rgba(220, 38, 38, 0.3);
+  --log-bg: #e2e8f0;
+}
+
+/* Configuración Global */
+body {
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  font-family: 'Share Tech Mono', monospace;
+  background-color: var(--bg-main) !important;
+  color: var(--text-main) !important;
+  background-image: radial-gradient(var(--bg-grid) 1px, transparent 0);
+  background-size: 20px 20px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Encabezado */
+header {
+  background: var(--header-bg) !important;
+  border-bottom: 2px solid var(--neon-yellow) !important;
+  box-shadow: 0 0 15px var(--neon-glow);
+  backdrop-filter: blur(8px);
+}
+
+/* Tarjetas Retro Minimalistas */
+.card {
+  background-color: var(--card-bg) !important;
+  border: 2px solid var(--card-border) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border-radius: 12px !important;
+  backdrop-filter: blur(6px);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: var(--neon-yellow) !important;
+  box-shadow: 0 0 12px var(--neon-glow);
+}
+
+/* Contenedores de Indicadores */
+.bg-secondary-subtle {
+  background-color: rgba(148, 163, 184, 0.12) !important;
+  border: 1px solid var(--card-border) !important;
+  border-radius: 8px;
+}
+
+.text-secondary {
+  color: var(--text-muted) !important;
+}
+
+/* Joystick Neón Arcade */
+#joystick-zone {
+  width: 220px;
+  height: 220px;
+  touch-action: none;
+  background: radial-gradient(circle, rgba(30,35,45,0.6) 0%, rgba(10,12,16,0.95) 100%) !important;
+  border: 3px solid var(--neon-yellow) !important;
+  box-shadow: 0 0 25px var(--neon-glow), inset 0 0 15px rgba(0, 0, 0, 0.8) !important;
+  cursor: grab;
+}
+
+#joystick-zone:active {
+  cursor: grabbing;
+}
+
+#joystick-knob {
+  width: 70px;
+  height: 70px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 35% 35%, #fffbcf 0%, #ffc107 60%, #b78103 100%) !important;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 20px var(--neon-glow), 0 4px 10px rgba(0,0,0,0.5);
+  transition: transform 0.05s ease-out;
+  pointer-events: none;
+}
+
+/* Botón Detener de Emergencia */
+#btn-stop-global {
+  background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%) !important;
+  border: 2px solid #fca5a5 !important;
+  color: #ffffff !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 20px var(--neon-red-glow) !important;
+  font-family: 'Share Tech Mono', monospace;
+  letter-spacing: 1px;
+  border-radius: 10px;
+}
+
+#btn-stop-global:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 8px var(--neon-red-glow) !important;
+}
+
+/* Botones Auxiliares */
+.btn-cmd {
+  min-height: 46px;
+  background-color: var(--card-bg) !important;
+  border: 1.5px solid var(--card-border) !important;
+  color: var(--text-main) !important;
+  font-family: 'Share Tech Mono', monospace;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+}
+
+.btn-cmd:hover {
+  border-color: var(--neon-yellow) !important;
+  color: var(--neon-yellow) !important;
+  box-shadow: 0 0 10px var(--neon-glow);
+}
+
+.btn-cmd:active, .btn-cmd.enviando {
+  background-color: var(--neon-yellow) !important;
+  color: #000000 !important;
+  font-weight: bold;
+  box-shadow: 0 0 16px var(--neon-glow) !important;
+}
+
+/* Select de DEMO y Ejecutar */
+.form-select {
+  font-family: 'Share Tech Mono', monospace;
+  border-color: var(--card-border) !important;
+}
+
+#btn-ejecutar-demo {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 0 12px var(--neon-glow);
+}
+
+/* Pantalla de Estado / Log */
+.alert-dark {
+  background-color: var(--log-bg) !important;
+  border: 1.5px solid var(--neon-yellow) !important;
+  box-shadow: 0 0 10px var(--neon-glow);
+  font-family: 'Share Tech Mono', monospace;
+  border-radius: 8px;
+}
+
+/* Footer */
+footer {
+  background: var(--header-bg) !important;
+  border-top: 1px solid var(--card-border) !important;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* Animaciones */
+.spin {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 576px) {
+  #joystick-zone {
+    width: 195px;
+    height: 195px;
+  }
+  #joystick-knob {
+    width: 62px;
+    height: 62px;
+  }
+}

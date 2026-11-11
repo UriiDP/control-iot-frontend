@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Título sin emoji para no duplicar con el favicon -->
+    <title>Control IoT - Excavadora RC</title>
+
+    <!-- Favicon SVG único para la pestaña del navegador -->
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚜</text></svg>">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Estilos Personalizados -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+
+    <!-- ENCABEZADO DE LA PÁGINA -->
+    <header class="py-2 border-bottom shadow-sm">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <span class="fs-4">🚜</span>
+                <div>
+                    <h1 class="h6 mb-0 text-warning fw-bold">CONTROL EXCAVADORA IoT</h1>
+                    <small class="text-secondary" id="vehiculo-nombre">Vehículo ID: 1</small>
+                </div>
+            </div>
+            <button id="btn-theme-toggle" class="btn btn-outline-warning btn-sm rounded-circle" title="Cambiar Tema">
+                <i class="bi bi-sun-fill"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- PANEL DE 3 INDICADORES DE CONECTIVIDAD -->
+    <section class="container my-2">
+        <div class="row g-2 text-center" id="panel-indicadores">
+            <!-- Indicador 1: WebSocket -->
+            <div class="col-4">
+                <div class="card bg-secondary-subtle border-0 py-2 px-1 h-100">
+                    <small class="d-block text-secondary fw-semibold">WebSocket WSS</small>
+                    <span id="badge-ws" class="badge bg-warning text-dark mt-1">
+                        <i class="bi bi-arrow-repeat spin"></i> Conectando...
+                    </span>
+                </div>
+            </div>
+            <!-- Indicador 2: API AWS -->
+            <div class="col-4">
+                <div class="card bg-secondary-subtle border-0 py-2 px-1 h-100">
+                    <small class="d-block text-secondary fw-semibold">API AWS (21)</small>
+                    <span id="badge-api" class="badge bg-secondary mt-1">
+                        <i class="bi bi-hourglass-split"></i> Comprobando
+                    </span>
+                </div>
+            </div>
+            <!-- Indicador 3: Amazon RDS -->
+            <div class="col-4">
+                <div class="card bg-secondary-subtle border-0 py-2 px-1 h-100">
+                    <small class="d-block text-secondary fw-semibold">Amazon RDS</small>
+                    <span id="badge-rds" class="badge bg-secondary mt-1">
+                        <i class="bi bi-database-dash"></i> Sin verificar
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTENIDO PRINCIPAL / CONTROLES DE MANDO -->
+    <main class="container my-auto py-2">
+        <div class="row g-3 align-items-center justify-content-center">
+
+            <!-- COLUMNA IZQUIERDA / CENTRAL: JOYSTICK VIRTUAL -->
+            <div class="col-12 col-md-6 text-center">
+                <div class="card p-3 shadow-lg">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-dark border border-warning text-warning">JOYSTICK PRINCIPAL</span>
+                        <span id="estado-joystick" class="badge bg-secondary">NEUTRAL</span>
+                    </div>
+
+                    <!-- Contenedor táctil del Joystick -->
+                    <div id="joystick-zone" class="mx-auto my-2 position-relative rounded-circle">
+                        <div id="joystick-knob" class="position-absolute rounded-circle"></div>
+                    </div>
+
+                    <div class="small text-secondary mt-1">
+                        <i class="bi bi-hand-index-thumb"></i> Arrastra para mover • Suelta para detener
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA: BOTONES COMPLEMENTARIOS Y DEMOS -->
+            <div class="col-12 col-md-6">
+
+                <!-- BOTÓN DETENER PRIORITARIO -->
+                <button id="btn-stop-global"
+                    class="btn btn-lg w-100 py-3 fw-bold mb-3 shadow-lg d-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-octagon-fill fs-4"></i> DETENER VEHÍCULO (STOP)
+                </button>
+
+                <!-- CONTROLES AUXILIARES / ACCIONES -->
+                <div class="card p-3 mb-3">
+                    <h6 class="card-title text-warning mb-2"><i class="bi bi-sliders"></i> Controles del Vehículo</h6>
+                    <div id="contenedor-botones-auxiliares" class="row g-2">
+                        <div class="col-6">
+                            <button class="btn btn-cmd w-100" data-comando="17">
+                                <i class="bi bi-arrow-up-circle"></i> Subir Garra
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button class="btn btn-cmd w-100" data-comando="18">
+                                <i class="bi bi-arrow-down-circle"></i> Bajar Garra
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button class="btn btn-cmd w-100" data-comando="15">
+                                <i class="bi bi-arrow-counterclockwise"></i> Giro Izq 90°
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button class="btn btn-cmd w-100" data-comando="16">
+                                <i class="bi bi-arrow-clockwise"></i> Giro Der 90°
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EJECUCIÓN DE SECUENCIAS DEMO -->
+                <div class="card p-3">
+                    <h6 class="card-title text-warning mb-2"><i class="bi bi-play-circle"></i> Secuencias Preprogramadas
+                        (DEMO)</h6>
+                    <div class="input-group">
+                        <select id="select-demo" class="form-select bg-dark text-light border-secondary">
+                            <option value="">Cargando DEMOs...</option>
+                        </select>
+                        <button id="btn-ejecutar-demo" class="btn fw-bold" disabled>
+                            <i class="bi bi-play-fill"></i> Ejecutar
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- FEEDBACK / LOG DE ACCIONES RECIENTES -->
+    <section class="container mb-3">
+        <div class="alert alert-dark border-secondary mb-0 py-2 d-flex justify-content-between align-items-center"
+            role="alert">
+            <small id="status-message" class="text-secondary">Sistema listo. Esperando interacción...</small>
+            <small id="status-timestamp" class="text-secondary font-monospace">--:--:--</small>
+        </div>
+    </section>
+
+    <!-- PIE DE PÁGINA (CRÉDITOS DEL ESTUDIANTE) -->
+    <footer class="py-2 mt-auto text-center text-secondary small">
+        <div class="container">
+            Desarrollado por <span class="fw-bold">Uriel Durán Peralta</span> · 2026
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Módulo Principal ES6 -->
+    <script type="module" src="js/app.js"></script>
+</body>
+
+</html>
