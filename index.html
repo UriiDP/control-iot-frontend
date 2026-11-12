@@ -3,153 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Excavadora IoT</title>
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Control Excavadora IoT • Panel Avanzado</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <!-- Fondo dinámico -->
-    <div class="ambient-bg">
+    <!-- Fondo ambiental con orbes líquidos -->
+    <div class="ambient-bg" aria-hidden="true">
         <div class="glow-orb orb-1"></div>
         <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+        <div class="grid-overlay"></div>
     </div>
 
-    <!-- Header Premium -->
+    <!-- Encabezado principal -->
     <header class="glass-header">
         <div class="brand">
-            <i class='bx bxs-tractor text-accent'></i>
-            <div>
-                <h1>Excavadora IoT</h1>
-                <p>Control • Monitoreo • Inteligencia</p>
+            <div class="brand-icon">
+                <i class="bx bxs-tractor"></i>
+            </div>
+            <div class="brand-text">
+                <h1>CONTROL EXCAVADORA IoT</h1>
+                <p>Vehículo ID: <strong>1</strong> • Control • Monitoreo • IA</p>
             </div>
         </div>
-        
-        <div class="header-controls">
-            <div class="status-pill active">
-                <i class='bx bx-wifi'></i> WSS Conectado
+
+        <div class="header-actions">
+            <div class="connection-badge" id="global-conn-badge">
+                <span class="pulse-dot"></span>
+                <span>Sistema en Línea</span>
             </div>
-            <button id="theme-toggle" class="icon-btn" aria-label="Cambiar tema">
-                <i class='bx bx-sun'></i>
+            <button id="theme-toggle" class="glass-icon-btn" title="Cambiar modo Claro / Oscuro" aria-label="Cambiar tema">
+                <i class="bx bx-sun" id="theme-icon"></i>
             </button>
         </div>
     </header>
 
-    <!-- Indicadores de Estado Globales -->
-    <div class="system-status-grid">
-        <div class="glass-card mini-stat">
-            <i class='bx bx-pulse text-green'></i>
-            <div class="stat-info">
-                <span>Estado API</span>
-                <strong>Operativo <div class="dot green"></div></strong>
+    <!-- Barra de telemetría superior (WSS, API, RDS) -->
+    <section class="telemetry-bar">
+        <div class="glass-card status-card">
+            <div class="status-card-header">
+                <span>WebSocket WSS</span>
+                <i class="bx bx-wifi"></i>
+            </div>
+            <div class="status-pill-bar online" id="ws-status-bar">
+                <i class="bx bx-broadcast"></i>
+                <span id="ws-status">En línea</span>
             </div>
         </div>
-        <div class="glass-card mini-stat">
-            <i class='bx bx-data text-blue'></i>
-            <div class="stat-info">
-                <span>Base de Datos</span>
-                <strong>RDS Activo <div class="dot blue"></div></strong>
-            </div>
-        </div>
-    </div>
 
-    <!-- Contenedor Principal de Vistas -->
+        <div class="glass-card status-card">
+            <div class="status-card-header">
+                <span>API AWS (EC2)</span>
+                <i class="bx bx-server"></i>
+            </div>
+            <div class="status-pill-bar online" id="api-status-bar">
+                <i class="bx bx-check-circle"></i>
+                <span id="api-status">Disponible</span>
+            </div>
+        </div>
+
+        <div class="glass-card status-card">
+            <div class="status-card-header">
+                <span>Amazon RDS</span>
+                <i class="bx bx-data"></i>
+            </div>
+            <div class="status-pill-bar online" id="rds-status-bar">
+                <i class="bx bx-hdd"></i>
+                <span id="rds-status">Disponible</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contenedor principal de pestañas -->
     <main class="app-viewport">
-        
-        <!-- VISTA: CONTROL (Dashboard principal) -->
+
+        <!-- =========================================================
+             PESTAÑA 1: CONTROL PRINCIPAL + VISTA 3D EN TIEMPO REAL
+             ========================================================= -->
         <section id="view-control" class="view active">
-            <div class="dashboard-grid">
-                <!-- Panel 3D (Simulación) -->
-                <div class="glass-card panel-3d">
-                    <div class="card-header">
-                        <h2><i class='bx bx-cube'></i> Simulación en Tiempo Real</h2>
-                        <button class="icon-btn mini"><i class='bx bx-fullscreen'></i></button>
-                    </div>
-                    <div class="canvas-placeholder">
-                        <i class='bx bx-loader-alt bx-spin'></i>
-                        <p>Motor 3D en espera...</p>
-                    </div>
-                </div>
+            <div class="control-dashboard-grid">
 
-                <!-- Panel de Control Manual -->
-                <div class="glass-card panel-controls">
-                    <div class="card-header highlight">
-                        <h2><i class='bx bxs-joystick'></i> Control Manual</h2>
+                <!-- Columna Izquierda: Simulación 3D en Tiempo Real -->
+                <div class="glass-card sim-card">
+                    <div class="card-top-bar">
+                        <div class="card-title">
+                            <i class="bx bx-cube-alt text-blue"></i>
+                            <h2>Simulación en Tiempo Real</h2>
+                        </div>
+                        <button class="glass-icon-btn mini" id="btn-expand-3d" title="Pantalla completa 3D">
+                            <i class="bx bx-fullscreen"></i>
+                        </button>
                     </div>
-                    
-                    <div class="controls-layout">
-                        <!-- Joystick -->
-                        <div class="joystick-wrapper">
-                            <div id="joystick-zone"></div>
+
+                    <div class="viewport-3d-preview" id="preview-3d-container">
+                        <!-- Escenario visual 3D / Canvas -->
+                        <div class="excavator-stage">
+                            <div class="radar-ring ring-1"></div>
+                            <div class="radar-ring ring-2"></div>
+                            <div class="excavator-hologram" id="excavator-model-proxy">
+                                <i class="bx bxs-tractor"></i>
+                                <span class="model-tag">MODELO 3D LISTO</span>
+                            </div>
                         </div>
 
-                        <!-- Botones de Acción -->
-                        <div class="action-buttons">
-                            <button class="glass-btn"><i class='bx bx-up-arrow-alt'></i> Brazo ↑</button>
-                            <button class="glass-btn"><i class='bx bx-down-arrow-alt'></i> Brazo ↓</button>
-                            <button class="glass-btn"><i class='bx bx-undo'></i> Giro Izq.</button>
-                            <button class="glass-btn"><i class='bx bx-redo'></i> Giro Der.</button>
+                        <div class="hud-telemetry-overlay">
+                            <div class="hud-chip"><span>Base:</span> <strong id="hud-angle">0°</strong></div>
+                            <div class="hud-chip"><span>Brazo:</span> <strong id="hud-arm">0%</strong></div>
+                            <div class="hud-chip"><span>Estado:</span> <strong id="hud-state">NEUTRAL</strong></div>
                         </div>
                     </div>
 
-                    <div class="movement-controls">
-                        <p class="subtitle"><i class='bx bx-run'></i> Secuencias</p>
-                        <div class="btn-group">
-                            <select class="glass-input">
-                                <option>Demo Principal</option>
-                                <option>Excavar</option>
-                            </select>
-                            <button class="glass-btn primary"><i class='bx bx-play'></i></button>
-                        </div>
-                        <button class="glass-btn danger mt-10"><i class='bx bx-stop-circle'></i> DETENER</button>
+                    <!-- Consola de eventos WebSocket en vivo -->
+                    <div class="console-log-bar" id="ws-log-bar">
+                        <span class="log-message" id="last-log-text">WebSocket listo para transmitir comandos.</span>
+                        <span class="log-time" id="last-log-time">--:--:--</span>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- VISTA: VOZ IA -->
-        <section id="view-voice" class="view">
-            <div class="glass-card full-center">
-                <i class='bx bx-bot giant-icon'></i>
-                <h2>Asistente de Voz IA</h2>
-                <p>Presiona el micrófono y di "Avanzar"</p>
-                <button class="glass-btn circle-huge pulse-animation"><i class='bx bxs-microphone'></i></button>
-            </div>
-        </section>
+                <!-- Columna Derecha: Control Manual Completo -->
+                <div class="glass-card manual-card">
+                    <div class="card-top-bar highlight-amber">
+                        <div class="card-title">
+                            <i class="bx bxs-joystick"></i>
+                            <h2>Control Manual</h2>
+                        </div>
+                        <span class="direction-badge" id="joystick-direction">NEUTRAL</span>
+                    </div>
 
-        <!-- VISTA: GESTOS -->
-        <section id="view-gestures" class="view">
-            <div class="glass-card full-center">
-                <i class='bx bx-hand giant-icon'></i>
-                <h2>Control Espacial por Gestos</h2>
-                <div class="camera-frame">
-                    <i class='bx bx-video-off'></i>
-                    <p>Cámara inactiva</p>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Barra Nav Estilo WhatsApp Liquid Glass -->
-    <nav class="liquid-nav-container">
-        <div class="liquid-nav">
-            <div class="nav-refraction"></div>
-            <a href="#" class="nav-item active" data-target="view-control">
-                <div class="nav-icon"><i class='bx bxs-joystick'></i></div>
-                <span>Control</span>
-            </a>
-            <a href="#" class="nav-item" data-target="view-voice">
-                <div class="nav-icon"><i class='bx bx-microphone'></i><div class="badge">IA</div></div>
-                <span>Voz</span>
-            </a>
-            <a href="#" class="nav-item" data-target="view-gestures">
-                <div class="nav-icon"><i class='bx bx-hand'></i></div>
-                <span>Gestos</span>
-            </a>
-        </div>
-    </nav>
-
-    <!-- Scripts -->
-    <script src="js/app.js"></script>
-</body>
-</html>
+                    <div class="manual-body">
+                        <!-- Zona del Joystick + Botonera Lateral -->
+                        <div class="joystick-and-actions">
+                            <div class="joystick-pad-container">
+                                <div class="joystick-ring-outer" id="joystick-zone">
+                                    <div class="dir-arrow up"><i class="bx bx-chevron
