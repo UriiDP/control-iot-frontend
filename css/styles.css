@@ -24,7 +24,7 @@
         inset 0 1.5px 1px rgba(255, 255, 255, 0.42),
         inset 0 -1.5px 2px rgba(56, 189, 248, 0.18);
 
-    /* Cápsula Óptica Líquida (sin encimar badges) */
+    /* Cápsula Óptica Líquida */
     --lens-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.04) 60%, rgba(255, 183, 3, 0.14));
     --lens-shadow:
         0 6px 16px rgba(0, 0, 0, 0.32),
@@ -88,7 +88,7 @@
 }
 
 /* =========================================================
-   RESET Y LAYOUT CON FOOTER EXCLUSIVO AL FINAL DEL SCROLL
+   RESET Y LAYOUT FLEX AJUSTADO AL RAZ DE LA PANTALLA
    ========================================================= */
 * {
     margin: 0;
@@ -111,6 +111,7 @@ body {
 .text-amber { color: var(--amber); }
 .text-blue { color: var(--blue); }
 .text-green { color: var(--green); }
+.text-red { color: var(--red); }
 
 /* =========================================================
    FONDO AMBIENTAL ANIMADO
@@ -159,7 +160,7 @@ body {
     -webkit-backdrop-filter: blur(30px) saturate(190%);
     border: 1px solid var(--border-glass);
     border-top-color: var(--border-specular);
-    border-radius: 24px;
+    border-radius: 22px;
     box-shadow: var(--shadow-card);
     transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
 }
@@ -168,29 +169,29 @@ body {
    HEADER SUPERIOR
    ========================================================= */
 .glass-header {
-    max-width: 1320px;
-    margin: 14px auto 12px;
-    padding: 13px 20px;
-    width: calc(100% - 28px);
+    max-width: 1400px;
+    margin: 12px auto 10px;
+    padding: 11px 18px;
+    width: calc(100% - 24px);
     background: var(--bg-card);
     backdrop-filter: blur(30px) saturate(190%);
     -webkit-backdrop-filter: blur(30px) saturate(190%);
     border: 1px solid var(--border-glass);
     border-top-color: var(--border-specular);
-    border-radius: 24px;
+    border-radius: 22px;
     box-shadow: var(--shadow-card);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
-.brand { display: flex; align-items: center; gap: 13px; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
 
 .brand-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 14px;
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
     background: var(--amber-soft);
     border: 1px solid var(--amber-glow);
     color: var(--amber);
@@ -200,17 +201,17 @@ body {
     box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35);
 }
 
-.brand-text h1 { font-size: 1.02rem; font-weight: 800; letter-spacing: 0.4px; color: var(--amber); }
-.brand-text p { font-size: 0.76rem; color: var(--text-secondary); margin-top: 2px; }
-.header-actions { display: flex; align-items: center; gap: 9px; }
+.brand-text h1 { font-size: 0.98rem; font-weight: 800; letter-spacing: 0.4px; color: var(--amber); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand-text p { font-size: 0.74rem; color: var(--text-secondary); margin-top: 1px; }
+.header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
 .connection-badge {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 7px 14px;
+    padding: 6px 13px;
     border-radius: 999px;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-weight: 600;
     transition: all 0.3s ease;
 }
@@ -234,14 +235,14 @@ body {
 }
 
 .glass-icon-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 13px;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
     background: var(--bg-subpanel);
     border: 1px solid var(--border-glass);
     border-top-color: var(--border-specular);
     color: var(--amber);
-    font-size: 1.2rem;
+    font-size: 1.15rem;
     display: grid;
     place-items: center;
     cursor: pointer;
@@ -250,47 +251,46 @@ body {
 
 .glass-icon-btn:hover { transform: translateY(-2px); border-color: var(--amber); }
 .glass-icon-btn:active { transform: scale(0.94); }
-.glass-icon-btn.mini { width: 34px; height: 34px; font-size: 1rem; color: var(--text-secondary); }
+.glass-icon-btn.mini { width: 32px; height: 32px; font-size: 0.95rem; color: var(--text-secondary); }
 
 /* =========================================================
-   TARJETAS DE TELEMETRÍA (WSS, API, RDS)
+   TARJETAS DE TELEMETRÍA (UNA SOLA FILA EN PC Y CELULAR)
    ========================================================= */
 .telemetry-bar {
-    max-width: 1320px;
-    width: calc(100% - 28px);
-    margin: 0 auto 16px;
+    max-width: 1400px;
+    width: calc(100% - 24px);
+    margin: 0 auto 12px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    gap: 10px;
 }
 
-@media (max-width: 768px) {
-    .telemetry-bar { grid-template-columns: 1fr; gap: 9px; }
-    .connection-badge { display: none; }
-    .brand-text h1 { font-size: 0.92rem; }
-}
+.short-label { display: none; }
 
-.status-card { padding: 11px 15px; }
+.status-card { padding: 9px 13px; }
 
 .status-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.76rem;
+    font-size: 0.74rem;
     font-weight: 600;
     color: var(--text-secondary);
-    margin-bottom: 7px;
+    margin-bottom: 6px;
 }
 
 .status-pill-bar {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 6px 12px;
-    border-radius: 10px;
-    font-size: 0.8rem;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 9px;
+    font-size: 0.78rem;
     font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     transition: all 0.3s ease;
 }
 
@@ -298,36 +298,59 @@ body {
 .status-pill-bar.online { background: var(--green-soft); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.32); }
 .status-pill-bar.offline { background: var(--red-soft); color: var(--red); border: 1px solid rgba(244, 63, 94, 0.32); }
 
+@media (max-width: 768px) {
+    .connection-badge { display: none; }
+    .brand-text h1 { font-size: 0.88rem; }
+    .brand-text p { font-size: 0.7rem; }
+
+    /* En celular los 3 indicadores van compactos en una sola línea */
+    .telemetry-bar { gap: 6px; margin-bottom: 10px; }
+    .full-label { display: none; }
+    .short-label { display: inline; font-size: 0.68rem; }
+    .status-card { padding: 7px 8px; border-radius: 14px; }
+    .status-card-header { margin-bottom: 4px; }
+    .status-pill-bar { padding: 4px 6px; font-size: 0.68rem; gap: 4px; }
+}
+
 /* =========================================================
-   CONTENEDOR DE VISTAS (SIN APILAMIENTO AL CAMBIAR)
+   CONTENEDOR DE VISTAS AL RAZ DE LA PANTALLA EN PC
    ========================================================= */
 .app-viewport {
     flex: 1;
-    max-width: 1320px;
-    width: calc(100% - 28px);
+    max-width: 1400px;
+    width: calc(100% - 24px);
     margin: 0 auto;
-    min-height: calc(100dvh - 155px); /* Empuja el footer debajo del pliegue inicial */
+    display: flex;
+    flex-direction: column;
 }
 
 .view {
     display: none;
     opacity: 0;
-    transform: translateY(8px);
 }
 
 .view.active {
-    display: block;
-    animation: viewFadeIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    animation: viewFadeIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes viewFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px) scale(0.99);
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* En PC, hacer que cada pestaña llene el alto disponible al ras sin espacio vacío */
+@media (min-width: 981px) {
+    .app-viewport {
+        min-height: calc(100dvh - 235px);
     }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
+    .control-dashboard-grid,
+    .monitoring-grid,
+    .full-panel {
+        flex: 1;
+        min-height: calc(100dvh - 238px);
     }
 }
 
@@ -336,19 +359,33 @@ body {
    ========================================================= */
 .control-dashboard-grid {
     display: grid;
-    grid-template-columns: 1fr 1.12fr;
-    gap: 16px;
+    grid-template-columns: 1.04fr 1.08fr;
+    gap: 14px;
     align-items: stretch;
+}
+
+/* Botón desplegable 3D exclusivo para celular */
+.mobile-3d-toggle {
+    display: none;
+    width: 100%;
+    margin-bottom: 10px;
+    justify-content: space-between;
+    padding: 11px 16px;
+    border-radius: 16px;
+    background: var(--bg-card);
 }
 
 @media (max-width: 980px) {
     .control-dashboard-grid { grid-template-columns: 1fr; }
+    .mobile-3d-toggle { display: flex; }
+    .mobile-collapsible { display: none !important; }
+    .mobile-collapsible.expanded { display: flex !important; margin-bottom: 4px; }
 }
 
 .sim-card, .manual-card { overflow: hidden; display: flex; flex-direction: column; }
 
 .card-top-bar {
-    padding: 14px 18px;
+    padding: 13px 18px;
     border-bottom: 1px solid var(--border-glass);
     display: flex;
     justify-content: space-between;
@@ -357,9 +394,9 @@ body {
 }
 
 .card-top-bar.highlight-amber { background: linear-gradient(90deg, var(--amber-soft), transparent 85%); }
-.card-title { display: flex; align-items: center; gap: 10px; }
-.card-title i { font-size: 1.3rem; color: var(--amber); }
-.card-title h2 { font-size: 0.98rem; font-weight: 700; }
+.card-title { display: flex; align-items: center; gap: 9px; }
+.card-title i { font-size: 1.25rem; color: var(--amber); }
+.card-title h2 { font-size: 0.95rem; font-weight: 700; }
 .sim-controls-mini { display: flex; align-items: center; gap: 8px; }
 
 .hint-pill {
@@ -382,10 +419,10 @@ body {
     color: var(--amber);
 }
 
-/* Vista Previa 3D WebGL con bloqueo estricto de scroll táctil en móvil */
+/* Vista Previa 3D WebGL */
 .viewport-3d-preview {
     flex: 1;
-    min-height: 315px;
+    min-height: 290px;
     position: relative;
     overflow: hidden;
     cursor: grab;
@@ -440,31 +477,39 @@ body {
     align-items: center;
     gap: 12px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
+    font-size: 0.74rem;
     color: var(--amber);
 }
 
 /* =========================================================
    CONTROLES MANUALES Y JOYSTICK
    ========================================================= */
-.manual-body { padding: 18px; display: flex; flex-direction: column; gap: 15px; }
+.manual-body {
+    padding: 16px 18px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 14px;
+}
 
 .joystick-and-actions {
     display: grid;
     grid-template-columns: 1fr 1.15fr;
-    gap: 16px;
+    gap: 14px;
     align-items: center;
 }
 
 @media (max-width: 600px) {
-    .joystick-and-actions { grid-template-columns: 1fr; }
+    .joystick-and-actions { grid-template-columns: 1fr; gap: 12px; }
+    .manual-body { padding: 14px; gap: 12px; }
 }
 
-.joystick-pad-container { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.joystick-pad-container { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 
 .joystick-ring-outer {
-    width: 175px;
-    height: 175px;
+    width: 176px;
+    height: 176px;
     border-radius: 50%;
     background: radial-gradient(circle, var(--bg-subpanel) 45%, rgba(255, 183, 3, 0.09) 100%);
     border: 2px solid var(--amber);
@@ -504,16 +549,16 @@ body {
 .joystick-knob:active { cursor: grabbing; }
 .helper-hint { font-size: 0.72rem; color: var(--text-secondary); text-align: center; }
 
-.actuators-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.actuators-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
 
 .glass-btn {
-    padding: 12px 13px;
-    border-radius: 15px;
+    padding: 11px 12px;
+    border-radius: 14px;
     background: var(--bg-subpanel);
     border: 1px solid var(--border-glass);
     border-top-color: var(--border-specular);
     color: var(--text-primary);
-    font-size: 0.83rem;
+    font-size: 0.82rem;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
@@ -526,10 +571,10 @@ body {
 
 .glass-btn:hover { border-color: var(--amber); transform: translateY(-1px); }
 .glass-btn:active { transform: scale(0.96); }
-.glass-btn.amber-solid { background: var(--amber); color: #0b0d12; border: none; font-weight: 700; }
+.glass-btn.amber-solid { background: var(--amber); color: #0b0d12; border: none; font-weight: 700; flex-shrink: 0; }
 
 .sequences-box {
-    padding: 13px;
+    padding: 12px 13px;
     border-radius: 16px;
     background: var(--bg-subpanel);
     border: 1px solid var(--border-glass);
@@ -539,33 +584,42 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-weight: 600;
     color: var(--text-secondary);
-    margin-bottom: 9px;
+    margin-bottom: 8px;
 }
 
-.sequence-row { display: flex; gap: 10px; }
+.sequence-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
 
+/* Fix para que el select nunca empuje el botón fuera de la pantalla en celular */
 .glass-select {
     flex: 1;
-    padding: 10px 14px;
+    min-width: 0;
+    width: 100%;
+    padding: 10px 12px;
     border-radius: 12px;
     background: var(--bg-card);
     border: 1px solid var(--border-glass);
     color: var(--text-primary);
-    font-size: 0.84rem;
+    font-size: 0.83rem;
     outline: none;
+    text-overflow: ellipsis;
 }
 
 .stop-emergency-btn {
     width: 100%;
-    padding: 15px;
-    border-radius: 16px;
+    padding: 14px;
+    border-radius: 15px;
     background: var(--red-gradient);
     border: 1px solid rgba(255, 255, 255, 0.28);
     color: #ffffff;
-    font-size: 0.94rem;
+    font-size: 0.92rem;
     font-weight: 800;
     letter-spacing: 0.6px;
     box-shadow: 0 10px 25px rgba(225, 29, 72, 0.38);
@@ -579,7 +633,7 @@ body {
 .monitoring-grid {
     display: grid;
     grid-template-columns: 0.92fr 1.25fr;
-    gap: 16px;
+    gap: 14px;
     align-items: stretch;
 }
 
@@ -588,29 +642,48 @@ body {
 }
 
 .monitor-card { display: flex; flex-direction: column; overflow: hidden; }
-.monitor-hero-body { padding: 20px; display: flex; flex-direction: column; gap: 18px; flex: 1; justify-content: space-between; }
+.monitor-hero-body { padding: 18px; display: flex; flex-direction: column; gap: 14px; flex: 1; justify-content: space-between; }
 
 .last-move-display {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 16px;
+    gap: 15px;
+    padding: 15px;
     border-radius: 18px;
     background: var(--bg-subpanel);
     border: 1px solid var(--border-glass);
 }
 
 .pulse-wave-icon {
-    width: 54px;
-    height: 54px;
+    width: 56px;
+    height: 56px;
     border-radius: 16px;
     background: var(--amber-soft);
     border: 1px solid var(--amber-glow);
     color: var(--amber);
-    font-size: 1.8rem;
+    font-size: 1.9rem;
     display: grid;
     place-items: center;
     flex-shrink: 0;
+    transition: all 0.25s ease;
+}
+
+.pulse-wave-icon.stop-mode {
+    background: var(--red-soft);
+    border-color: rgba(244, 63, 94, 0.45);
+    color: var(--red);
+}
+
+.pulse-wave-icon.move-mode {
+    background: var(--green-soft);
+    border-color: rgba(16, 185, 129, 0.45);
+    color: var(--green);
+}
+
+.pulse-wave-icon.turn-mode {
+    background: var(--blue-soft);
+    border-color: rgba(56, 189, 248, 0.45);
+    color: var(--blue);
 }
 
 .micro-label {
@@ -621,9 +694,9 @@ body {
 }
 
 .last-move-info h3 {
-    font-size: 1.35rem;
+    font-size: 1.3rem;
     font-weight: 800;
-    margin-top: 4px;
+    margin-top: 3px;
     color: var(--text-primary);
     letter-spacing: 0.3px;
 }
@@ -635,7 +708,7 @@ body {
 }
 
 .meta-box {
-    padding: 12px 14px;
+    padding: 11px 14px;
     border-radius: 14px;
     background: var(--bg-subpanel);
     border: 1px solid var(--border-glass);
@@ -653,12 +726,12 @@ body {
 
 .meta-box strong {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     color: var(--amber);
 }
 
 .history-table-wrapper {
-    padding: 12px 18px;
+    padding: 10px 18px;
     overflow-x: auto;
     flex: 1;
 }
@@ -671,7 +744,7 @@ body {
 
 .glass-table th {
     text-align: left;
-    padding: 10px 10px;
+    padding: 9px 10px;
     font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.6px;
@@ -680,7 +753,7 @@ body {
 }
 
 .glass-table td {
-    padding: 10px 10px;
+    padding: 9px 10px;
     border-bottom: 1px solid var(--border-glass);
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.78rem;
@@ -690,10 +763,10 @@ body {
 .table-empty-msg { text-align: center; padding: 28px 12px !important; color: var(--text-secondary); }
 
 .monitor-footnote {
-    padding: 12px 18px;
+    padding: 11px 18px;
     border-top: 1px solid var(--border-glass);
     background: var(--bg-subpanel);
-    font-size: 0.73rem;
+    font-size: 0.72rem;
     color: var(--text-secondary);
     line-height: 1.45;
 }
@@ -701,11 +774,11 @@ body {
 /* =========================================================
    VISTAS SECUNDARIAS (3D FULL, VOZ IA, GESTOS)
    ========================================================= */
-.full-panel { min-height: 500px; display: flex; flex-direction: column; overflow: hidden; }
+.full-panel { display: flex; flex-direction: column; overflow: hidden; }
 
 .full-3d-stage {
     flex: 1;
-    min-height: 440px;
+    min-height: 400px;
     position: relative;
     overflow: hidden;
     cursor: grab;
@@ -715,7 +788,7 @@ body {
 
 .full-3d-stage:active { cursor: grabbing; }
 
-.center-stage { align-items: center; justify-content: center; text-align: center; padding: 40px 24px; gap: 16px; }
+.center-stage { align-items: center; justify-content: center; text-align: center; padding: 32px 20px; gap: 14px; }
 
 .ai-badge {
     padding: 6px 14px;
@@ -728,17 +801,17 @@ body {
     letter-spacing: 0.8px;
 }
 
-.muted-desc { max-width: 500px; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; }
-.mic-orb-wrapper { position: relative; width: 130px; height: 130px; display: grid; place-items: center; margin: 14px 0; }
+.muted-desc { max-width: 500px; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; }
+.mic-orb-wrapper { position: relative; width: 124px; height: 124px; display: grid; place-items: center; margin: 10px 0; }
 
 .mic-trigger-btn {
-    width: 84px;
-    height: 84px;
+    width: 82px;
+    height: 82px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--amber), #f59e0b);
     border: none;
     color: #0b0d12;
-    font-size: 2.2rem;
+    font-size: 2.1rem;
     display: grid;
     place-items: center;
     cursor: pointer;
@@ -761,19 +834,19 @@ body {
 .transcript-box {
     width: 100%;
     max-width: 520px;
-    padding: 16px 20px;
+    padding: 14px 18px;
     border-radius: 16px;
     background: var(--bg-subpanel);
     border: 1px solid var(--border-glass);
 }
 
-.transcript-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text-secondary); }
-.transcript-box p { margin-top: 6px; font-size: 0.95rem; font-weight: 600; }
+.transcript-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text-secondary); }
+.transcript-box p { margin-top: 5px; font-size: 0.92rem; font-weight: 600; }
 
 .camera-viewport {
     flex: 1;
-    min-height: 380px;
-    margin: 18px;
+    min-height: 340px;
+    margin: 16px;
     border-radius: 18px;
     background: var(--bg-subpanel);
     border: 1px dashed var(--border-glass);
@@ -785,10 +858,10 @@ body {
 
 .camera-viewport video {
     width: 100%;
-    max-height: 410px;
+    max-height: 390px;
     object-fit: cover;
     border-radius: 16px;
-    transform: scaleX(-1); /* Vista espejo natural */
+    transform: scaleX(-1);
 }
 
 .gesture-hud-overlay {
@@ -802,26 +875,25 @@ body {
 }
 
 .camera-placeholder { text-align: center; padding: 24px; max-width: 390px; }
-.camera-placeholder i { font-size: 3.2rem; color: var(--text-secondary); margin-bottom: 10px; }
-.camera-placeholder p { font-size: 0.84rem; color: var(--text-secondary); margin-top: 6px; line-height: 1.45; }
+.camera-placeholder i { font-size: 3rem; color: var(--text-secondary); margin-bottom: 10px; }
+.camera-placeholder p { font-size: 0.83rem; color: var(--text-secondary); margin-top: 6px; line-height: 1.45; }
 
 /* =========================================================
-   PIE DE PÁGINA HASTA EL FINAL DEL SCROLL
+   PIE DE PÁGINA AL FINAL DEL SCROLL
    ========================================================= */
 .app-footer {
-    margin-top: 48px;
+    margin-top: 24px;
     width: 100%;
-    padding: 20px 16px calc(92px + env(safe-area-inset-bottom, 0px));
+    padding: 16px 16px calc(86px + env(safe-area-inset-bottom, 0px));
     text-align: center;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--text-secondary);
-    border-top: 1px solid var(--border-glass);
 }
 
 .app-footer strong { color: var(--amber); font-weight: 600; }
 
 /* =========================================================
-   BARRA INFERIOR LIQUID GLASS REAL (PEGADA ABAJO, SIN SOLAPAR)
+   BARRA INFERIOR LIQUID GLASS REAL
    ========================================================= */
 .liquid-dock-wrapper {
     position: fixed;
@@ -872,7 +944,6 @@ body {
     pointer-events: none;
 }
 
-/* Cápsula líquida translúcida con desenfoque dinámico durante el desplazamiento */
 .liquid-lens {
     position: absolute;
     top: 5px;
@@ -893,7 +964,6 @@ body {
     overflow: hidden;
 }
 
-/* Al desplazarse entre menús activa refracción óptica + mayor blur */
 .liquid-lens.sliding {
     backdrop-filter: url(#liquid-glass-refraction) blur(16px) saturate(220%) brightness(1.24);
     -webkit-backdrop-filter: blur(16px) saturate(220%) brightness(1.24);

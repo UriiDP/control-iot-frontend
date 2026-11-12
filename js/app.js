@@ -19,13 +19,68 @@ document.addEventListener('DOMContentLoaded', () => {
         20: 'EJECUCIÓN DEMO'
     };
 
+    // Mapa de íconos representativos para cada movimiento en Monitoreo
+    function obtenerIconoMovimiento(codigo, texto = '') {
+        const c = Number(codigo);
+        const upper = String(texto).toUpperCase();
+
+        if (c === 0 || upper.includes('STOP') || upper.includes('DETENER')) {
+            return { icon: 'bx bxs-octagon', theme: 'stop-mode' };
+        }
+        if (c === 11 || upper.includes('AVANZAR')) {
+            return { icon: 'bx bx-up-arrow-alt', theme: 'move-mode' };
+        }
+        if (c === 12 || upper.includes('RETROCEDER')) {
+            return { icon: 'bx bx-down-arrow-alt', theme: 'move-mode' };
+        }
+        if (c === 13 || upper === 'IZQUIERDA') {
+            return { icon: 'bx bx-left-arrow-alt', theme: 'turn-mode' };
+        }
+        if (c === 14 || upper === 'DERECHA') {
+            return { icon: 'bx bx-right-arrow-alt', theme: 'turn-mode' };
+        }
+        if (c === 15 || upper.includes('SUBIR')) {
+            return { icon: 'bx bx-up-arrow-circle', theme: '' };
+        }
+        if (c === 16 || upper.includes('BAJAR')) {
+            return { icon: 'bx bx-down-arrow-circle', theme: '' };
+        }
+        if (c === 17 || upper.includes('GIRO IZQ')) {
+            return { icon: 'bx bx-undo', theme: 'turn-mode' };
+        }
+        if (c === 18 || upper.includes('GIRO DER')) {
+            return { icon: 'bx bx-redo', theme: 'turn-mode' };
+        }
+        if (c === 20 || upper.includes('DEMO')) {
+            return { icon: 'bx bx-play-circle', theme: '' };
+        }
+        return { icon: 'bx bx-radio-circle-marked', theme: '' };
+    }
+
     // =========================================================
-    // 1. INICIALIZAR MOTOR 3D REAL (THREE.JS)
+    // 1. INICIALIZAR MOTOR 3D REAL (THREE.JS) + TOGGLE MÓVIL
     // =========================================================
     const sim3D = new Excavator3DManager([
         document.getElementById('preview-3d-container'),
         document.getElementById('full-3d-canvas-container')
     ]);
+
+    const btnMobileToggle3D = document.getElementById('btn-mobile-toggle-3d');
+    const mobileSimCard = document.getElementById('mobile-sim-card');
+    const mobileToggleText = document.getElementById('mobile-3d-toggle-text');
+    const mobileToggleIcon = document.getElementById('mobile-3d-toggle-icon');
+
+    if (btnMobileToggle3D && mobileSimCard) {
+        btnMobileToggle3D.addEventListener('click', () => {
+            const isExpanded = mobileSimCard.classList.toggle('expanded');
+            if (mobileToggleText) {
+                mobileToggleText.textContent = isExpanded ? 'Ocultar Simulación 3D' : 'Mostrar Simulación 3D';
+            }
+            if (mobileToggleIcon) {
+                mobileToggleIcon.className = isExpanded ? 'bx bx-chevron-up' : 'bx bx-chevron-down';
+            }
+        });
+    }
 
     const hudAngle = document.getElementById('hud-angle');
     const hudArm = document.getElementById('hud-arm');
@@ -107,23 +162,43 @@ document.addEventListener('DOMContentLoaded', () => {
                     setBadgeState('rds-status-bar', 'rds-status-icon', 'rds-status', 'online', 'RDS Conectada', 'bx bx-check-circle');
                 } else {
                     rdsOnline = false;
-                    setBadgeState('rds-status-bar', 'rds-status-icon', 'rds-status', 'offline', 'Error en RDS', 'bx bx-x-circle');
+                    setBadgeState('rds-status-bar', 'rds-status-icon', 'rds-status', 'offline', 'Error RDS', 'bx bx-x-circle');
                 }
             } else {
                 rdsOnline = false;
-                setBadgeState('rds-status-bar', 'rds-status-icon', 'rds-status', 'offline', `Error HTTP ${resp.status}`, 'bx bx-x-circle');
+                setBadgeState('rds-status-bar', 'rds-status-icon', 'rds-status', 'offline', `HTTP ${resp.status}`, 'bx bx-x-circle');
             }
         } catch (err) {
             clearTimeout(timeoutId);
             apiOnline = false;
             rdsOnline = false;
-            setBadgeState('api-status-bar', 'api-status-icon', 'api-status', 'offline', 'Sin respuesta EC2', 'bx bx-x-circle');
-            setBadgeState('rds-status-bar', 'rds-status-icon', 'rds-status', 'offline', 'Sin conexión RDS', 'bx bx-x-circle');
+            setBadgeState('api-status-bar', 'api-status-icon', 'api-status', 'offline', 'Sin EC2', 'bx bx-x-circle');
+            setBadgeState('rds-status-bar', 'rds-status-icon', 'rds-status', 'offline', 'Sin RDS', 'bx bx-x-circle');
         }
     }
 
+    // Cargar DEMOs reales (Demo Principal y Demo Personalizada)
+    async function cargarDemosDisponibles() {
+        const seqSelect = document.getElementById('sequence-select');
+        if (!seqSelect) return;
+
+        try {
+            const resp = await fetch(`${BASE_URL}/demos`);
+            if (!resp.ok) return;
+            const data = await resp.json();
+            const lista = Array.isArray(data) ? data : (data.demos || data.datos || []);
+            if (lista.length > 0) {
+                seqSelect.innerHTML = lista.map((d, idx) => {
+                    const id = d.id_demo ?? d.id ?? (idx + 1);
+                    const nombre = d.nombre || (idx === 0 ? 'Demo Principal' : 'Demo Personalizada');
+                    return `<option value="${id}">${nombre}</option>`;
+                }).join('');
+            }
+        } catch (_) {}
+    }
+
     // =========================================================
-    // 3. PESTAÑA DE MONITOREO E HISTORIAL RDS
+    // 3. PESTAÑA DE MONITOREO E HISTORIAL RDS CON ÍCONO DINÁMICO
     // =========================================================
     function actualizarPanelUltimoMovimiento(codigo, nombreAccion, origen = 'WEB') {
         const now = new Date();
@@ -132,12 +207,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const dateEl = document.getElementById('mon-fecha');
         const timeEl = document.getElementById('mon-hora');
         const originEl = document.getElementById('mon-origin-text');
+        const iconBox = document.getElementById('mon-action-icon-box');
+        const iconEl = document.getElementById('mon-action-icon');
 
-        if (actionEl) actionEl.textContent = nombreAccion || NOMBRES_COMANDOS[codigo] || `COMANDO #${codigo}`;
+        const etiquetaFinal = nombreAccion || NOMBRES_COMANDOS[codigo] || `COMANDO #${codigo}`;
+        const visual = obtenerIconoMovimiento(codigo, etiquetaFinal);
+
+        if (actionEl) actionEl.textContent = etiquetaFinal;
         if (codeEl) codeEl.textContent = codigo !== undefined ? `#${codigo}` : '—';
         if (dateEl) dateEl.textContent = now.toLocaleDateString('es-MX');
         if (timeEl) timeEl.textContent = now.toLocaleTimeString('es-MX');
         if (originEl) originEl.textContent = `Origen: ${origen} • Sincronizado en tiempo real`;
+
+        if (iconBox) iconBox.className = `pulse-wave-icon ${visual.theme}`.trim();
+        if (iconEl) iconEl.className = visual.icon;
     }
 
     async function cargarHistorialRDS() {
@@ -159,6 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cod = item.id_comando ?? item.codigo ?? '—';
                 const mov = item.nombre_comando || item.movimiento || NOMBRES_COMANDOS[cod] || `Comando ${cod}`;
                 const orig = item.origen || 'WEB';
+                const visual = obtenerIconoMovimiento(cod, mov);
                 const rawFecha = item.fecha_hora || item.fecha || '';
                 let fechaStr = 'Hoy';
                 let horaStr = '—';
@@ -180,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return `
                     <tr>
                         <td>${index + 1}</td>
-                        <td><strong>${mov}</strong></td>
+                        <td><i class="${visual.icon} text-amber" style="vertical-align: middle; margin-right: 4px;"></i><strong>${mov}</strong></td>
                         <td>${orig}</td>
                         <td>${fechaStr}</td>
                         <td>${horaStr}</td>
@@ -230,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             socket.onerror = () => {
                 wsOnline = false;
-                setBadgeState('ws-status-bar', 'ws-status-icon', 'ws-status', 'offline', 'Error de conexión', 'bx bx-wifi-off');
+                setBadgeState('ws-status-bar', 'ws-status-icon', 'ws-status', 'offline', 'Error WSS', 'bx bx-wifi-off');
             };
 
             socket.onclose = () => {
@@ -247,11 +331,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     verificarSaludBackend();
+    cargarDemosDisponibles();
     conectarWebSocket();
     cargarHistorialRDS();
 
     document.getElementById('btn-refresh-status')?.addEventListener('click', () => {
         verificarSaludBackend();
+        cargarDemosDisponibles();
         cargarHistorialRDS();
         if (!wsOnline) conectarWebSocket();
     });
@@ -318,6 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const idDemo = seqSelect.value;
             const nombre = seqSelect.options[seqSelect.selectedIndex].text;
             registrarEvento(`Iniciando secuencia: ${nombre}...`);
+            actualizarPanelUltimoMovimiento(20, nombre.toUpperCase(), 'DEMO_WEB');
             try {
                 await fetch(`${BASE_URL}/demos/${idDemo}/ejecutar?id_vehiculo=${ID_VEHICULO}`, { method: 'POST' });
             } catch (_) {
@@ -344,7 +431,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                // Fuerza la solicitud real de permiso de micrófono en PC y Celular
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 stream.getTracks().forEach((track) => track.stop());
 
@@ -398,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 recognition.start();
             } catch (err) {
                 voiceStatusLabel.textContent = 'Permiso de micrófono denegado o bloqueado';
-                voiceTranscriptText.textContent = 'Habilita el acceso al micrófono en los ajustes de tu navegador (HTTPS requerido).';
+                voiceTranscriptText.textContent = 'Habilita el acceso al micrófono en los ajustes de tu navegador.';
             }
         });
     }
@@ -489,7 +575,6 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.classList.add('active');
             moveLiquidLens(btn, true);
 
-            // Ocultar la vista anterior inmediatamente para evitar que la nueva aparezca abajo
             views.forEach((view) => {
                 if (view.id === targetId) {
                     view.classList.add('active');
