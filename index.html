@@ -57,9 +57,9 @@
         <div class="header-actions">
             <div class="connection-badge checking" id="global-conn-badge">
                 <span class="pulse-dot"></span>
-                <span id="global-conn-text">Sincronizando...</span>
+                <span id="global-conn-text">Verificando...</span>
             </div>
-            <button id="btn-refresh-status" class="glass-icon-btn" title="Verificar conexión AWS / RDS / WSS" aria-label="Verificar conexión">
+            <button id="btn-refresh-status" class="glass-icon-btn" title="Comprobar estado real AWS / RDS / WSS" aria-label="Verificar conexión">
                 <i class="bx bx-refresh"></i>
             </button>
             <button id="theme-toggle" class="glass-icon-btn" title="Cambiar modo Claro / Oscuro" aria-label="Cambiar tema">
@@ -74,11 +74,13 @@
             <div class="status-card-header">
                 <span class="full-label">WebSocket WSS</span>
                 <span class="short-label">WSS</span>
-                <i class="bx bx-wifi"></i>
+                <button id="btn-ws-toggle" class="ws-mini-toggle" title="Conectar o desconectar túnel WebSocket">
+                    <i class="bx bx-power-off"></i>
+                </button>
             </div>
-            <div class="status-pill-bar checking" id="ws-status-bar">
-                <i class="bx bx-loader-alt bx-spin" id="ws-status-icon"></i>
-                <span id="ws-status">Conectando...</span>
+            <div class="status-pill-bar offline" id="ws-status-bar">
+                <i class="bx bx-wifi-off" id="ws-status-icon"></i>
+                <span id="ws-status">Desconectado</span>
             </div>
         </div>
 
@@ -114,10 +116,12 @@
              PESTAÑA 1: CONTROL PRINCIPAL + SIMULACIÓN 3D
              ========================================================= -->
         <section id="view-control" class="view active">
-            <!-- Botón desplegable exclusivo para móvil (oculta/muestra la preview 3D) -->
+            <!-- Botón desplegable exclusivo para celular y tablet -->
             <button id="btn-mobile-toggle-3d" class="glass-btn mobile-3d-toggle" type="button">
-                <i class="bx bx-cube-alt text-blue"></i>
-                <span id="mobile-3d-toggle-text">Mostrar Simulación 3D</span>
+                <span style="display: flex; align-items: center; gap: 8px;">
+                    <i class="bx bx-cube-alt text-blue"></i>
+                    <span id="mobile-3d-toggle-text">Mostrar Simulación 3D</span>
+                </span>
                 <i class="bx bx-chevron-down" id="mobile-3d-toggle-icon"></i>
             </button>
 
@@ -142,7 +146,7 @@
 
                     <div class="viewport-3d-preview" id="preview-3d-container">
                         <div class="hud-telemetry-overlay">
-                            <div class="hud-chip"><span>Rumbo:</span> <strong id="hud-angle">0°</strong></div>
+                            <div class="hud-chip"><span>Cabina:</span> <strong id="hud-angle">0°</strong></div>
                             <div class="hud-chip"><span>Brazo:</span> <strong id="hud-arm">50%</strong></div>
                             <div class="hud-chip"><span>Estado:</span> <strong id="hud-state">NEUTRAL</strong></div>
                         </div>
@@ -150,7 +154,7 @@
 
                     <!-- Consola de eventos WebSocket en vivo -->
                     <div class="console-log-bar" id="ws-log-bar">
-                        <span class="log-message" id="last-log-text">Iniciando enlace con servidor AWS...</span>
+                        <span class="log-message" id="last-log-text">Esperando conexión con servidor...</span>
                         <span class="log-time" id="last-log-time">--:--:--</span>
                     </div>
                 </div>
@@ -208,7 +212,7 @@
                             </div>
                         </div>
 
-                        <!-- Secuencias Preprogramadas (Solo Demo Principal y Demo Personalizada) -->
+                        <!-- Secuencias Preprogramadas -->
                         <div class="sequences-box">
                             <label for="sequence-select"><i class="bx bx-play-circle text-amber"></i> Secuencias Preprogramadas (DEMO)</label>
                             <div class="sequence-row">
@@ -345,7 +349,7 @@
                 <div class="full-3d-stage" id="full-3d-canvas-container">
                     <div class="hud-telemetry-overlay">
                         <div class="hud-chip"><span>Posición X/Z:</span> <strong id="hud-pos-full">0.0, 0.0</strong></div>
-                        <div class="hud-chip"><span>Rumbo:</span> <strong id="hud-angle-full">0°</strong></div>
+                        <div class="hud-chip"><span>Cabina:</span> <strong id="hud-angle-full">0°</strong></div>
                         <div class="hud-chip"><span>Elevación Garra:</span> <strong id="hud-arm-full">50%</strong></div>
                     </div>
                 </div>

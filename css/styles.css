@@ -279,6 +279,23 @@ body {
     margin-bottom: 6px;
 }
 
+.ws-mini-toggle {
+    background: var(--bg-subpanel);
+    border: 1px solid var(--border-glass);
+    color: var(--text-secondary);
+    border-radius: 6px;
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.ws-mini-toggle:hover { color: var(--amber); border-color: var(--amber); }
+.ws-mini-toggle.connected { color: var(--green); border-color: rgba(16, 185, 129, 0.45); }
+
 .status-pill-bar {
     display: flex;
     align-items: center;
@@ -303,7 +320,6 @@ body {
     .brand-text h1 { font-size: 0.88rem; }
     .brand-text p { font-size: 0.7rem; }
 
-    /* En celular los 3 indicadores van compactos en una sola línea */
     .telemetry-bar { gap: 6px; margin-bottom: 10px; }
     .full-label { display: none; }
     .short-label { display: inline; font-size: 0.68rem; }
@@ -341,7 +357,6 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* En PC, hacer que cada pestaña llene el alto disponible al ras sin espacio vacío */
 @media (min-width: 981px) {
     .app-viewport {
         min-height: calc(100dvh - 235px);
@@ -364,7 +379,29 @@ body {
     align-items: stretch;
 }
 
-/* Botón desplegable 3D exclusivo para celular */
+.glass-btn {
+    padding: 11px 12px;
+    border-radius: 14px;
+    background: var(--bg-subpanel);
+    border: 1px solid var(--border-glass);
+    border-top-color: var(--border-specular);
+    color: var(--text-primary);
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: transform 0.14s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.glass-btn:hover { border-color: var(--amber); transform: translateY(-1px); }
+.glass-btn:active { transform: scale(0.96); }
+.glass-btn.amber-solid { background: var(--amber); color: #0b0d12; border: none; font-weight: 700; flex-shrink: 0; }
+
+/* Botón desplegable 3D: oculto en PC, visible solo en celular y tablet */
 .mobile-3d-toggle {
     display: none;
     width: 100%;
@@ -375,9 +412,13 @@ body {
     background: var(--bg-card);
 }
 
+@media (min-width: 981px) {
+    .mobile-3d-toggle { display: none !important; }
+}
+
 @media (max-width: 980px) {
     .control-dashboard-grid { grid-template-columns: 1fr; }
-    .mobile-3d-toggle { display: flex; }
+    .mobile-3d-toggle { display: flex !important; }
     .mobile-collapsible { display: none !important; }
     .mobile-collapsible.expanded { display: flex !important; margin-bottom: 4px; }
 }
@@ -551,28 +592,6 @@ body {
 
 .actuators-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
 
-.glass-btn {
-    padding: 11px 12px;
-    border-radius: 14px;
-    background: var(--bg-subpanel);
-    border: 1px solid var(--border-glass);
-    border-top-color: var(--border-specular);
-    color: var(--text-primary);
-    font-size: 0.82rem;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    cursor: pointer;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    transition: transform 0.14s ease, border-color 0.2s ease, background 0.2s ease;
-}
-
-.glass-btn:hover { border-color: var(--amber); transform: translateY(-1px); }
-.glass-btn:active { transform: scale(0.96); }
-.glass-btn.amber-solid { background: var(--amber); color: #0b0d12; border: none; font-weight: 700; flex-shrink: 0; }
-
 .sequences-box {
     padding: 12px 13px;
     border-radius: 16px;
@@ -597,7 +616,6 @@ body {
     width: 100%;
 }
 
-/* Fix para que el select nunca empuje el botón fuera de la pantalla en celular */
 .glass-select {
     flex: 1;
     min-width: 0;

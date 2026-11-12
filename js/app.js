@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
         20: 'EJECUCIÓN DEMO'
     };
 
-    // Mapa de íconos representativos para cada movimiento en Monitoreo
     function obtenerIconoMovimiento(codigo, texto = '') {
         const c = Number(codigo);
         const upper = String(texto).toUpperCase();
@@ -100,10 +99,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
 
     // =========================================================
-    // 2. GESTIÓN AUTÉNTICA DE INDICADORES (WSS, API AWS, RDS)
+    // 2. VERIFICACIÓN REAL DE AWS EC2, AMAZON RDS Y WEBSOCKET
     // =========================================================
     const logText = document.getElementById('last-log-text');
     const logTime = document.getElementById('last-log-time');
+    const btnWsToggle = document.getElementById('btn-ws-toggle');
 
     let wsOnline = false;
     let apiOnline = false;
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
             globalText.textContent = 'Sistema 100% En Línea';
         } else if (apiOnline || wsOnline) {
             globalBadge.className = 'connection-badge checking';
-            globalText.textContent = 'Conexión Parcial';
+            globalText.textContent = wsOnline ? 'WSS Activo • Revisar RDS' : 'API Activa • WSS Off';
         } else {
             globalBadge.className = 'connection-badge offline';
             globalText.textContent = 'Servidor Desconectado';
@@ -146,18 +146,33 @@ document.addEventListener('DOMContentLoaded', () => {
         setBadgeState('rds-status-bar', 'rds-status-icon', 'rds-status', 'checking', 'Verificando...', 'bx bx-loader-alt bx-spin');
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const timeoutId = setTimeout(() => controller.abort(), 4500);
 
         try {
-            const resp = await fetch(`${BASE_URL}/vehiculos`, { signal: controller.signal });
+            // Sin caché para detectar al instante si EC2/FastAPI se apaga
+            const resp = await fetch(`${BASE_URL}/vehiculos/1/historial?_t=${Date.now()}`, {
+                cache: 'no-store',
+                signal: controller.signal
+            });
             clearTimeout(timeoutId);
 
-            apiOnline = true;
-            setBadgeState('api-status-bar', 'api-status-icon', 'api-status', 'online', 'EC2 Activa', 'bx bx-check-circle');
+            // Si FastAPI responde con cualquier código válido (<500), EC2 está activa
+            if (resp.status < 500) {
+                apiOnline = true;
+                setBadgeState('api-status-bar', 'api-status-icon', 'api-status', 'online', 'EC2 Activa', 'bx bx-check-circle');
+            } else {
+                apiOnline = false;
+                rdsOnline = false;
+                setBadgeState('api-status-bar', 'api-status-icon', 'api-status', 'offline', `HTTP ${resp.status}`, 'bx bx-x-circle');
+                setBadgeState('rds-status-bar', 'rds-status-icon', 'rds-status', 'offline', 'Sin RDS', 'bx bx-x-circle');
+                return;
+            }
 
+            // Verificar que Amazon RDS devolvió una estructura real de datos MySQL
             if (resp.ok) {
                 const data = await resp.json();
-                if (data && data.status !== 'error') {
+                const tieneEstructuraReal = Array.isArray(data) || Array.isArray(data.historial) || Array.isArray(data.datos);
+                if (tieneEstructuraReal && data.status !== 'error') {
                     rdsOnline = true;
                     setBadgeState('rds-status-bar', 'rds-status-icon', 'rds-status', 'online', 'RDS Conectada', 'bx bx-check-circle');
                 } else {
@@ -166,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else {
                 rdsOnline = false;
-                setBadgeState('rds-status-bar', 'rds-status-icon', 'rds-status', 'offline', `HTTP ${resp.status}`, 'bx bx-x-circle');
+                setBadgeState('rds-status-bar', 'rds-status-icon', 'rds-status', 'offline', 'Sin respuesta DB', 'bx bx-x-circle');
             }
         } catch (err) {
             clearTimeout(timeoutId);
@@ -177,13 +192,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Cargar DEMOs reales (Demo Principal y Demo Personalizada)
     async function cargarDemosDisponibles() {
         const seqSelect = document.getElementById('sequence-select');
         if (!seqSelect) return;
 
         try {
-            const resp = await fetch(`${BASE_URL}/demos`);
+            const resp = await fetch(`${BASE_URL}/demos?_t=${Date.now()}`, { cache: 'no-store' });
             if (!resp.ok) return;
             const data = await resp.json();
             const lista = Array.isArray(data) ? data : (data.demos || data.datos || []);
@@ -228,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!tbody) return;
 
         try {
-            const resp = await fetch(`${BASE_URL}/vehiculos/${ID_VEHICULO}/historial`);
+            const resp = await fetch(`${BASE_URL}/vehiculos/${ID_VEHICULO}/historial?_t=${Date.now()}`, { cache: 'no-store' });
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             const data = await resp.json();
             const registros = Array.isArray(data) ? data : (data.historial || data.datos || []);
@@ -279,28 +293,47 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-reload-history')?.addEventListener('click', cargarHistorialRDS);
 
     // =========================================================
-    // 4. CONEXIÓN WEBSOCKET REAL
+    // 4. CONEXIÓN WEBSOCKET REAL (MANUAL + VALIDACIÓN DE HANDSHAKE)
     // =========================================================
     let socket = null;
-    let reconnectTimer = null;
+
+    function desconectarWebSocket() {
+        if (socket) {
+            socket.close();
+            socket = null;
+        }
+        wsOnline = false;
+        btnWsToggle?.classList.remove('connected');
+        setBadgeState('ws-status-bar', 'ws-status-icon', 'ws-status', 'offline', 'Desconectado', 'bx bx-wifi-off');
+        registrarEvento('Túnel WebSocket cerrado manualmente.');
+    }
 
     function conectarWebSocket() {
-        if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) return;
+        if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
+            desconectarWebSocket();
+            return;
+        }
 
         wsOnline = false;
         setBadgeState('ws-status-bar', 'ws-status-icon', 'ws-status', 'checking', 'Conectando...', 'bx bx-loader-alt bx-spin');
+        registrarEvento('Solicitando apertura de túnel WebSocket...');
 
         try {
             socket = new WebSocket(WS_URL);
 
             socket.onopen = () => {
-                wsOnline = true;
-                setBadgeState('ws-status-bar', 'ws-status-icon', 'ws-status', 'online', 'En línea', 'bx bx-broadcast');
-                registrarEvento('WebSocket WSS conectado en tiempo real.');
+                // Esperamos confirmación real del servidor FastAPI antes de marcar online
+                registrarEvento('Socket abierto, esperando saludo JSON del servidor...');
             };
 
             socket.onmessage = (event) => {
+                if (!wsOnline && socket && socket.readyState === WebSocket.OPEN) {
+                    wsOnline = true;
+                    btnWsToggle?.classList.add('connected');
+                    setBadgeState('ws-status-bar', 'ws-status-icon', 'ws-status', 'online', 'En línea', 'bx bx-broadcast');
+                }
                 registrarEvento(`WSS ← ${event.data}`);
+
                 try {
                     const payload = JSON.parse(event.data);
                     if (payload && payload.id_comando !== undefined) {
@@ -314,15 +347,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             socket.onerror = () => {
                 wsOnline = false;
+                btnWsToggle?.classList.remove('connected');
                 setBadgeState('ws-status-bar', 'ws-status-icon', 'ws-status', 'offline', 'Error WSS', 'bx bx-wifi-off');
+                registrarEvento('Fallo al conectar WebSocket WSS.');
             };
 
             socket.onclose = () => {
                 wsOnline = false;
+                btnWsToggle?.classList.remove('connected');
                 setBadgeState('ws-status-bar', 'ws-status-icon', 'ws-status', 'offline', 'Desconectado', 'bx bx-wifi-off');
-                registrarEvento('WebSocket desconectado. Reintentando en 5s...');
-                clearTimeout(reconnectTimer);
-                reconnectTimer = setTimeout(conectarWebSocket, 5000);
+                registrarEvento('Conexión WebSocket cerrada.');
+                socket = null;
             };
         } catch (err) {
             wsOnline = false;
@@ -330,16 +365,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Botón para conectar/desconectar WebSocket manualmente cuando tú quieras
+    btnWsToggle?.addEventListener('click', conectarWebSocket);
+
+    // Verificación inicial real de EC2 y RDS (sin falsos positivos)
     verificarSaludBackend();
     cargarDemosDisponibles();
-    conectarWebSocket();
     cargarHistorialRDS();
 
     document.getElementById('btn-refresh-status')?.addEventListener('click', () => {
         verificarSaludBackend();
         cargarDemosDisponibles();
         cargarHistorialRDS();
-        if (!wsOnline) conectarWebSocket();
     });
 
     // =========================================================
