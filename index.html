@@ -1,172 +1,146 @@
 <!DOCTYPE html>
-<html lang="es" data-bs-theme="dark">
-
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Título sin emoji para no duplicar con el favicon -->
     <title>Control IoT - Excavadora RC</title>
-
-    <!-- Favicon SVG único para la pestaña del navegador -->
-    <link rel="icon" type="image/svg+xml"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚜</text></svg>">
-
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <!-- Estilos Personalizados -->
-    <link rel="stylesheet" href="css/styles.css">
+    <!-- Iconos modernos -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="css/style.css">
 </head>
+<body>
+    <!-- Animación de fondo (Orbes líquidos) -->
+    <div class="ambient-background">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
 
-<body class="d-flex flex-column min-vh-100">
-
-    <!-- ENCABEZADO DE LA PÁGINA -->
-    <header class="py-2 border-bottom shadow-sm">
-        <div class="container d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-2">
-                <span class="fs-4">🚜</span>
-                <div>
-                    <h1 class="h6 mb-0 text-warning fw-bold">CONTROL EXCAVADORA IoT</h1>
-                    <small class="text-secondary" id="vehiculo-nombre">Vehículo ID: 1</small>
-                </div>
+    <!-- Encabezado superior tipo Dynamic Island -->
+    <header class="glass-header">
+        <h1 class="app-title"><i class='bx bxs-tractor'></i> CONTROL EXCAVADORA IoT</h1>
+        <div class="header-status-group">
+            <div class="status-indicator">
+                <i class='bx bx-wifi'></i>
+                <span id="ws-status" class="status-text green">WSS</span>
             </div>
-            <button id="btn-theme-toggle" class="btn btn-outline-warning btn-sm rounded-circle" title="Cambiar Tema">
-                <i class="bi bi-sun-fill"></i>
-            </button>
+            <div class="status-indicator">
+                <i class='bx bx-cloud'></i>
+                <span id="api-status" class="status-text green">API</span>
+            </div>
+            <div class="status-indicator">
+                <i class='bx bx-data'></i>
+                <span id="rds-status" class="status-text green">RDS</span>
+            </div>
         </div>
     </header>
 
-    <!-- PANEL DE 3 INDICADORES DE CONECTIVIDAD -->
-    <section class="container my-2">
-        <div class="row g-2 text-center" id="panel-indicadores">
-            <!-- Indicador 1: WebSocket -->
-            <div class="col-4">
-                <div class="card bg-secondary-subtle border-0 py-2 px-1 h-100">
-                    <small class="d-block text-secondary fw-semibold">WebSocket WSS</small>
-                    <span id="badge-ws" class="badge bg-warning text-dark mt-1">
-                        <i class="bi bi-arrow-repeat spin"></i> Conectando...
-                    </span>
+    <!-- Contenedor principal de vistas -->
+    <main class="app-content">
+        
+        <!-- PESTAÑA 1: CONTROL MANUAL (Tu app original) -->
+        <section id="view-control" class="view active">
+            
+            <div class="glass-panel">
+                <h2><i class='bx bx-joystick'></i> Joystick Principal</h2>
+                <div id="joystick-zone" style="height: 250px; position: relative; margin: 20px 0;">
+                    <!-- Aquí el JS de nipplejs renderiza tu joystick -->
                 </div>
-            </div>
-            <!-- Indicador 2: API AWS -->
-            <div class="col-4">
-                <div class="card bg-secondary-subtle border-0 py-2 px-1 h-100">
-                    <small class="d-block text-secondary fw-semibold">API AWS (21)</small>
-                    <span id="badge-api" class="badge bg-secondary mt-1">
-                        <i class="bi bi-hourglass-split"></i> Comprobando
-                    </span>
-                </div>
-            </div>
-            <!-- Indicador 3: Amazon RDS -->
-            <div class="col-4">
-                <div class="card bg-secondary-subtle border-0 py-2 px-1 h-100">
-                    <small class="d-block text-secondary fw-semibold">Amazon RDS</small>
-                    <span id="badge-rds" class="badge bg-secondary mt-1">
-                        <i class="bi bi-database-dash"></i> Sin verificar
-                    </span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CONTENIDO PRINCIPAL / CONTROLES DE MANDO -->
-    <main class="container my-auto py-2">
-        <div class="row g-3 align-items-center justify-content-center">
-
-            <!-- COLUMNA IZQUIERDA / CENTRAL: JOYSTICK VIRTUAL -->
-            <div class="col-12 col-md-6 text-center">
-                <div class="card p-3 shadow-lg">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="badge bg-dark border border-warning text-warning">JOYSTICK PRINCIPAL</span>
-                        <span id="estado-joystick" class="badge bg-secondary">NEUTRAL</span>
-                    </div>
-
-                    <!-- Contenedor táctil del Joystick -->
-                    <div id="joystick-zone" class="mx-auto my-2 position-relative rounded-circle">
-                        <div id="joystick-knob" class="position-absolute rounded-circle"></div>
-                    </div>
-
-                    <div class="small text-secondary mt-1">
-                        <i class="bi bi-hand-index-thumb"></i> Arrastra para mover • Suelta para detener
-                    </div>
-                </div>
+                <p style="text-align: center; font-size: 0.8rem; color: var(--text-secondary);">Arrastra para mover • Suelta para detener</p>
             </div>
 
-            <!-- COLUMNA DERECHA: BOTONES COMPLEMENTARIOS Y DEMOS -->
-            <div class="col-12 col-md-6">
-
-                <!-- BOTÓN DETENER PRIORITARIO -->
-                <button id="btn-stop-global"
-                    class="btn btn-lg w-100 py-3 fw-bold mb-3 shadow-lg d-flex align-items-center justify-content-center gap-2">
-                    <i class="bi bi-octagon-fill fs-4"></i> DETENER VEHÍCULO (STOP)
+            <div class="glass-panel">
+                <button id="btn-stop" class="glass-btn danger">
+                    <i class='bx bx-stop-circle'></i> DETENER VEHÍCULO (STOP)
                 </button>
-
-                <!-- CONTROLES AUXILIARES / ACCIONES -->
-                <div class="card p-3 mb-3">
-                    <h6 class="card-title text-warning mb-2"><i class="bi bi-sliders"></i> Controles del Vehículo</h6>
-                    <div id="contenedor-botones-auxiliares" class="row g-2">
-                        <div class="col-6">
-                            <button class="btn btn-cmd w-100" data-comando="17">
-                                <i class="bi bi-arrow-up-circle"></i> Subir Garra
-                            </button>
-                        </div>
-                        <div class="col-6">
-                            <button class="btn btn-cmd w-100" data-comando="18">
-                                <i class="bi bi-arrow-down-circle"></i> Bajar Garra
-                            </button>
-                        </div>
-                        <div class="col-6">
-                            <button class="btn btn-cmd w-100" data-comando="15">
-                                <i class="bi bi-arrow-counterclockwise"></i> Giro Izq 90°
-                            </button>
-                        </div>
-                        <div class="col-6">
-                            <button class="btn btn-cmd w-100" data-comando="16">
-                                <i class="bi bi-arrow-clockwise"></i> Giro Der 90°
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- EJECUCIÓN DE SECUENCIAS DEMO -->
-                <div class="card p-3">
-                    <h6 class="card-title text-warning mb-2"><i class="bi bi-play-circle"></i> Secuencias Preprogramadas
-                        (DEMO)</h6>
-                    <div class="input-group">
-                        <select id="select-demo" class="form-select bg-dark text-light border-secondary">
-                            <option value="">Cargando DEMOs...</option>
-                        </select>
-                        <button id="btn-ejecutar-demo" class="btn fw-bold" disabled>
-                            <i class="bi bi-play-fill"></i> Ejecutar
-                        </button>
-                    </div>
-                </div>
-
             </div>
-        </div>
+
+            <div class="glass-panel commands-container">
+                <h2><i class='bx bx-slider-alt'></i> Controles del Vehículo</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                    <button class="glass-btn"><i class='bx bx-up-arrow-alt'></i> Subir Garra</button>
+                    <button class="glass-btn"><i class='bx bx-down-arrow-alt'></i> Bajar Garra</button>
+                    <button class="glass-btn"><i class='bx bx-undo'></i> Giro Izq 90°</button>
+                    <button class="glass-btn"><i class='bx bx-redo'></i> Giro Der 90°</button>
+                </div>
+            </div>
+
+            <div class="glass-panel">
+                <h2><i class='bx bx-play-circle'></i> Secuencias Preprogramadas</h2>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <select class="glass-select" style="flex: 1; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.5); color: white; border: 1px solid var(--glass-border);">
+                        <option value="demo1">Demo Principal</option>
+                        <option value="demo2">Excavar y Soltar</option>
+                    </select>
+                    <button class="glass-btn accent" style="background: var(--accent-color); color: black; border: none;">
+                        <i class='bx bx-play'></i> Ejecutar
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- PESTAÑA 2: ANIMACIÓN 3D -->
+        <section id="view-3d" class="view">
+            <div class="glass-panel full-height" style="height: 70vh; display: flex; flex-direction: column;">
+                <h2><i class='bx bx-cube-alt'></i> Telemetría 3D en Vivo</h2>
+                <div id="canvas-3d-container" style="flex: 1; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); border-radius: 15px; margin-top: 15px;">
+                    <p class="placeholder-text" style="color: var(--text-secondary);"><i class='bx bx-loader-alt bx-spin'></i> Inicializando motor gráfico...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PESTAÑA 3: CONTROL POR VOZ -->
+        <section id="view-voice" class="view">
+            <div class="glass-panel full-height" style="height: 70vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                <h2><i class='bx bx-microphone'></i> Asistente IA</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 30px;">Toca para hablar. Intenta decir: "Avanzar", "Subir garra" o "Detener"</p>
+                <div class="voice-visualizer">
+                    <button id="btn-mic" class="glass-btn round" style="width: 100px; height: 100px; border-radius: 50%; font-size: 3rem; background: rgba(255, 183, 3, 0.2); border-color: var(--accent-color); color: var(--accent-color);">
+                        <i class='bx bx-microphone'></i>
+                    </button>
+                </div>
+                <div id="voice-transcript" style="margin-top: 30px; font-style: italic; color: #fff;">Escuchando...</div>
+            </div>
+        </section>
+
+        <!-- PESTAÑA 4: GESTOS (CÁMARA) -->
+        <section id="view-gestures" class="view">
+            <div class="glass-panel full-height" style="height: 70vh; display: flex; flex-direction: column;">
+                <h2><i class='bx bx-hand'></i> Control por Gestos</h2>
+                <div class="camera-feed" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); border-radius: 15px; margin-top: 15px;">
+                    <i class='bx bx-video-off' style="font-size: 3rem; color: var(--text-secondary); margin-bottom: 10px;"></i>
+                    <p style="color: var(--text-secondary);">Cámara apagada</p>
+                    <button class="glass-btn" style="margin-top: 15px;"><i class='bx bx-video'></i> Activar Cámara</button>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <!-- FEEDBACK / LOG DE ACCIONES RECIENTES -->
-    <section class="container mb-3">
-        <div class="alert alert-dark border-secondary mb-0 py-2 d-flex justify-content-between align-items-center"
-            role="alert">
-            <small id="status-message" class="text-secondary">Sistema listo. Esperando interacción...</small>
-            <small id="status-timestamp" class="text-secondary font-monospace">--:--:--</small>
-        </div>
-    </section>
+    <!-- Barra de navegación inferior (Liquid Glass) -->
+    <nav class="bottom-nav glass-nav">
+        <a href="#" class="nav-item active" data-target="view-control">
+            <i class='bx bx-joystick'></i>
+            <span>Control</span>
+        </a>
+        <a href="#" class="nav-item" data-target="view-3d">
+            <i class='bx bx-cube-alt'></i>
+            <span>3D View</span>
+        </a>
+        <a href="#" class="nav-item" data-target="view-voice">
+            <i class='bx bx-microphone'></i>
+            <span>Voz IA</span>
+        </a>
+        <a href="#" class="nav-item" data-target="view-gestures">
+            <i class='bx bx-hand'></i>
+            <span>Gestos</span>
+        </a>
+    </nav>
 
-    <!-- PIE DE PÁGINA (CRÉDITOS DEL ESTUDIANTE) -->
-    <footer class="py-2 mt-auto text-center text-secondary small">
-        <div class="container">
-            Desarrollado por <span class="fw-bold">Uriel Durán Peralta</span> · 2026
-        </div>
-    </footer>
-
-    <!-- Bootstrap 5 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Módulo Principal ES6 -->
-    <script type="module" src="js/app.js"></script>
+    <!-- Tus scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/websocket.js"></script>
+    <script src="js/navigation.js"></script>
+    <!-- Asegúrate de incluir el script de tu joystick (ej. nipplejs) si lo tienes externo -->
 </body>
-
 </html>

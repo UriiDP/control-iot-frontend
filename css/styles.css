@@ -1,205 +1,237 @@
-/* ==========================================================================
-   Estilos Retro-Minimalista Neón - Control IoT Excavadora RC
-   ========================================================================== */
-
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
-/* MODO OSCURO (Cyberpunk Retro Neon) */
-[data-bs-theme="dark"] {
-  --bg-main: #090c10;
-  --bg-grid: rgba(255, 204, 0, 0.05);
-  --header-bg: rgba(13, 17, 23, 0.95);
-  --card-bg: rgba(18, 22, 31, 0.85);
-  --card-border: #232936;
-  --text-main: #f0f6fc;
-  --text-muted: #8b949e;
-  
-  --neon-yellow: #ffcc00;
-  --neon-glow: rgba(255, 204, 0, 0.35);
-  --neon-red: #ff3344;
-  --neon-red-glow: rgba(255, 51, 68, 0.45);
-  --log-bg: #05070a;
+/* =========================================
+   VARIABLES Y RESET
+   ========================================= */
+:root {
+    --bg-color: #05050A; /* Negro azulado muy profundo */
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-glow: rgba(255, 255, 255, 0.02);
+    --accent-color: #ffb703; /* Tu amarillo retro */
+    --danger-color: #e63946;
+    --text-primary: #f8f9fa;
+    --text-secondary: #adb5bd;
 }
 
-/* MODO CLARO (Retro Tech Minimalist Neon) */
-[data-bs-theme="light"] {
-  --bg-main: #f4f6fb;
-  --bg-grid: rgba(217, 119, 6, 0.08);
-  --header-bg: rgba(255, 255, 255, 0.95);
-  --card-bg: rgba(255, 255, 255, 0.9);
-  --card-border: #cbd5e1;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  
-  --neon-yellow: #d97706;
-  --neon-glow: rgba(217, 119, 6, 0.25);
-  --neon-red: #dc2626;
-  --neon-red-glow: rgba(220, 38, 38, 0.3);
-  --log-bg: #e2e8f0;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* Configuración Global */
 body {
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-  font-family: 'Share Tech Mono', monospace;
-  background-color: var(--bg-main) !important;
-  color: var(--text-main) !important;
-  background-image: radial-gradient(var(--bg-grid) 1px, transparent 0);
-  background-size: 20px 20px;
-  transition: background-color 0.3s ease, color 0.3s ease;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    overflow: hidden; /* Evita scroll en la página principal, lo haremos interno */
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Encabezado */
-header {
-  background: var(--header-bg) !important;
-  border-bottom: 2px solid var(--neon-yellow) !important;
-  box-shadow: 0 0 15px var(--neon-glow);
-  backdrop-filter: blur(8px);
+/* =========================================
+   FONDOS ANIMADOS (Blobs Líquidos)
+   ========================================= */
+.ambient-background {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: -1;
+    overflow: hidden;
 }
 
-/* Tarjetas Retro Minimalistas */
-.card {
-  background-color: var(--card-bg) !important;
-  border: 2px solid var(--card-border) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border-radius: 12px !important;
-  backdrop-filter: blur(6px);
-  transition: all 0.3s ease;
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.6;
+    animation: float 20s infinite alternate ease-in-out;
 }
 
-.card:hover {
-  border-color: var(--neon-yellow) !important;
-  box-shadow: 0 0 12px var(--neon-glow);
+.blob-1 {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(255,183,3,0.4) 0%, rgba(0,0,0,0) 70%);
+    top: -50px; left: -50px;
 }
 
-/* Contenedores de Indicadores */
-.bg-secondary-subtle {
-  background-color: rgba(148, 163, 184, 0.12) !important;
-  border: 1px solid var(--card-border) !important;
-  border-radius: 8px;
+.blob-2 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(0,119,182,0.4) 0%, rgba(0,0,0,0) 70%);
+    bottom: -100px; right: -50px;
+    animation-delay: -5s;
 }
 
-.text-secondary {
-  color: var(--text-muted) !important;
+.blob-3 {
+    width: 250px; height: 250px;
+    background: radial-gradient(circle, rgba(230,57,70,0.3) 0%, rgba(0,0,0,0) 70%);
+    top: 40%; left: 40%;
+    animation-delay: -10s;
 }
 
-/* Joystick Neón Arcade */
-#joystick-zone {
-  width: 220px;
-  height: 220px;
-  touch-action: none;
-  background: radial-gradient(circle, rgba(30,35,45,0.6) 0%, rgba(10,12,16,0.95) 100%) !important;
-  border: 3px solid var(--neon-yellow) !important;
-  box-shadow: 0 0 25px var(--neon-glow), inset 0 0 15px rgba(0, 0, 0, 0.8) !important;
-  cursor: grab;
+@keyframes float {
+    0% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0, 0) scale(1); }
 }
 
-#joystick-zone:active {
-  cursor: grabbing;
+/* =========================================
+   COMPONENTES GLASSMORPHISM
+   ========================================= */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), inset 0 1px 2px var(--glass-glow);
+    padding: 20px;
+    margin-bottom: 20px;
 }
 
-#joystick-knob {
-  width: 70px;
-  height: 70px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(circle at 35% 35%, #fffbcf 0%, #ffc107 60%, #b78103 100%) !important;
-  border: 2px solid #ffffff;
-  box-shadow: 0 0 20px var(--neon-glow), 0 4px 10px rgba(0,0,0,0.5);
-  transition: transform 0.05s ease-out;
-  pointer-events: none;
+/* =========================================
+   HEADER & NAVEGACIÓN
+   ========================================= */
+.glass-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    margin: 15px;
+    background: rgba(10, 10, 15, 0.4);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid var(--glass-border);
+    border-radius: 100px; /* Estilo Dynamic Island */
+    z-index: 10;
 }
 
-/* Botón Detener de Emergencia */
-#btn-stop-global {
-  background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%) !important;
-  border: 2px solid #fca5a5 !important;
-  color: #ffffff !important;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
-  box-shadow: 0 0 20px var(--neon-red-glow) !important;
-  font-family: 'Share Tech Mono', monospace;
-  letter-spacing: 1px;
-  border-radius: 10px;
+.glass-header h1 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 1px;
 }
 
-#btn-stop-global:active {
-  transform: translateY(2px);
-  box-shadow: 0 0 8px var(--neon-red-glow) !important;
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
 }
 
-/* Botones Auxiliares */
-.btn-cmd {
-  min-height: 46px;
-  background-color: var(--card-bg) !important;
-  border: 1.5px solid var(--card-border) !important;
-  color: var(--text-main) !important;
-  font-family: 'Share Tech Mono', monospace;
-  transition: all 0.2s ease;
-  border-radius: 8px;
+.status-indicator .green { color: #2ecc71; text-shadow: 0 0 10px rgba(46,204,113,0.5); }
+
+/* =========================================
+   SISTEMA DE PESTAÑAS (Views)
+   ========================================= */
+.app-content {
+    flex: 1;
+    position: relative;
+    padding: 0 15px;
+    overflow-y: auto;
+    padding-bottom: 100px; /* Espacio para el Bottom Nav */
 }
 
-.btn-cmd:hover {
-  border-color: var(--neon-yellow) !important;
-  color: var(--neon-yellow) !important;
-  box-shadow: 0 0 10px var(--neon-glow);
+.view {
+    display: none;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.btn-cmd:active, .btn-cmd.enviando {
-  background-color: var(--neon-yellow) !important;
-  color: #000000 !important;
-  font-weight: bold;
-  box-shadow: 0 0 16px var(--neon-glow) !important;
+.view.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
 }
 
-/* Select de DEMO y Ejecutar */
-.form-select {
-  font-family: 'Share Tech Mono', monospace;
-  border-color: var(--card-border) !important;
+/* =========================================
+   BOTONES
+   ========================================= */
+.glass-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    padding: 12px 20px;
+    border-radius: 16px;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
 }
 
-#btn-ejecutar-demo {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-  color: #ffffff !important;
-  border: none !important;
-  box-shadow: 0 0 12px var(--neon-glow);
+.glass-btn:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.1);
 }
 
-/* Pantalla de Estado / Log */
-.alert-dark {
-  background-color: var(--log-bg) !important;
-  border: 1.5px solid var(--neon-yellow) !important;
-  box-shadow: 0 0 10px var(--neon-glow);
-  font-family: 'Share Tech Mono', monospace;
-  border-radius: 8px;
+.glass-btn.danger {
+    background: rgba(230, 57, 70, 0.15);
+    border-color: rgba(230, 57, 70, 0.3);
+    color: #ff6b6b;
+    width: 100%;
+    margin-top: 15px;
 }
 
-/* Footer */
-footer {
-  background: var(--header-bg) !important;
-  border-top: 1px solid var(--card-border) !important;
-  font-family: 'Share Tech Mono', monospace;
+/* =========================================
+   BOTTOM NAVIGATION (Menú Inferior)
+   ========================================= */
+.bottom-nav {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+    max-width: 500px;
+    display: flex;
+    justify-content: space-around;
+    padding: 15px 10px;
+    background: rgba(15, 15, 20, 0.6);
+    backdrop-filter: blur(40px) saturate(150%);
+    -webkit-backdrop-filter: blur(40px) saturate(150%);
+    border: 1px solid var(--glass-border);
+    border-radius: 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    z-index: 100;
 }
 
-/* Animaciones */
-.spin {
-  animation: spin 1s linear infinite;
-  display: inline-block;
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    width: 60px;
 }
 
-@keyframes spin {
-  100% { transform: rotate(360deg); }
+.nav-item i {
+    font-size: 1.5rem;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-@media (max-width: 576px) {
-  #joystick-zone {
-    width: 195px;
-    height: 195px;
-  }
-  #joystick-knob {
-    width: 62px;
-    height: 62px;
-  }
+.nav-item span {
+    font-size: 0.65rem;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(5px);
+    transition: all 0.3s ease;
+}
+
+.nav-item.active {
+    color: var(--accent-color);
+}
+
+.nav-item.active i {
+    transform: translateY(-5px) scale(1.2);
+    text-shadow: 0 0 15px rgba(255, 183, 3, 0.5);
+}
+
+.nav-item.active span {
+    opacity: 1;
+    transform: translateY(-2px);
 }
