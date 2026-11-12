@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Motor 3D Interactivo (Three.js) - Gemelo Digital Excavadora RC
+   Motor 3D Interactivo (Three.js) - Escenario de Construcción + Excavadora
    ========================================================================== */
 
 export class Excavator3DManager {
@@ -7,16 +7,15 @@ export class Excavator3DManager {
         this.containers = containers.filter(Boolean);
         this.scenes = [];
 
-        // Estado cinemático compartido
         this.state = {
             posX: 0,
             posZ: 0,
-            headingRad: 0,       // Rotación izquierda/derecha en 3D
-            armElevation: 0.5,   // 0 (abajo) a 1 (arriba)
+            headingRad: 0,
+            armElevation: 0.5,
             linearSpeed: 0,
             angularSpeed: 0,
-            cameraOrbitYaw: 0.65,
-            cameraOrbitPitch: 0.48
+            cameraOrbitYaw: 0.72,
+            cameraOrbitPitch: 0.44
         };
 
         if (typeof window.THREE === 'undefined' || this.containers.length === 0) return;
@@ -34,55 +33,69 @@ export class Excavator3DManager {
     createViewport(container) {
         const THREE = window.THREE;
         const width = container.clientWidth || 420;
-        const height = container.clientHeight || 300;
+        const height = container.clientHeight || 315;
 
         const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x6ec6ff);
+        scene.fog = new THREE.FogExp2(0x8fd3ff, 0.024);
 
-        const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 100);
-        camera.position.set(4.6, 3.4, 4.6);
-        camera.lookAt(0, 0.7, 0);
+        const camera = new THREE.PerspectiveCamera(44, width / height, 0.1, 120);
+        camera.position.set(5.2, 3.6, 5.2);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(width, height);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
         container.prepend(renderer.domElement);
 
-        // Iluminación
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
-        scene.add(ambientLight);
+        // Iluminación natural de día en obra
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x6b8e23, 0.9);
+        scene.add(hemiLight);
 
-        const dirLight = new THREE.DirectionalLight(0xfff5d6, 1.4);
-        dirLight.position.set(6, 10, 5);
-        scene.add(dirLight);
+        const sunLight = new THREE.DirectionalLight(0xfffbeb, 1.35);
+        sunLight.position.set(10, 16, 8);
+        sunLight.castShadow = true;
+        scene.add(sunLight);
 
-        const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.75);
-        rimLight.position.set(-6, 4, -5);
-        scene.add(rimLight);
+        // Suelo verde / terreno de obra
+        const groundGeo = new THREE.CircleGeometry(32, 48);
+        const groundMat = new THREE.MeshStandardMaterial({ color: 0x6ab04c, roughness: 0.9 });
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
 
-        // Cuadrícula espacial del suelo
-        const gridHelper = new THREE.GridHelper(16, 24, 0xffb703, 0x334155);
-        gridHelper.material.opacity = 0.35;
-        gridHelper.material.transparent = true;
-        scene.add(gridHelper);
+        // Plataforma central de tierra compactada
+        const dirtGeo = new THREE.CircleGeometry(7.2, 40);
+        const dirtMat = new THREE.MeshStandardMaterial({ color: 0xb08968, roughness: 0.95 });
+        const dirtPad = new THREE.Mesh(dirtGeo, dirtMat);
+        dirtPad.rotation.x = -Math.PI / 2;
+        dirtPad.position.y = 0.01;
+        scene.add(dirtPad);
 
-        // Aro guía alrededor de la base
-        const ringGeo = new THREE.RingGeometry(1.45, 1.52, 48);
-        const ringMat = new THREE.MeshBasicMaterial({ color: 0xffb703, side: THREE.DoubleSide, transparent: true, opacity: 0.45 });
+        // Aro guía alrededor de la excavadora
+        const ringGeo = new THREE.RingGeometry(1.42, 1.5, 48);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0xffb703, side: THREE.DoubleSide, transparent: true, opacity: 0.65 });
         const ringMesh = new THREE.Mesh(ringGeo, ringMat);
         ringMesh.rotation.x = -Math.PI / 2;
-        ringMesh.position.y = 0.01;
+        ringMesh.position.y = 0.025;
         scene.add(ringMesh);
 
-        // Construcción de la Excavadora 3D Articulada
+        // Construir entorno de construcción (nubes, montañas de arena, conos, tubos, edificio y grúa)
+        this.buildConstructionSite(scene, THREE);
+
+        // =========================================================
+        // EXCAVADORA 3D ARTICULADA
+        // =========================================================
         const rootGroup = new THREE.Group();
         scene.add(rootGroup);
 
         const matYellow = new THREE.MeshStandardMaterial({ color: 0xffb703, metalness: 0.25, roughness: 0.35 });
         const matDark = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.45, roughness: 0.5 });
-        const matGlass = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.8, roughness: 0.15, transparent: true, opacity: 0.75 });
+        const matGlass = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.85, roughness: 0.15 });
         const matSteel = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.75, roughness: 0.25 });
 
-        // 1. Chasis inferior y orugas izquierda/derecha
+        // Orugas
         const trackGeo = new THREE.BoxGeometry(1.9, 0.34, 0.36);
         const leftTrack = new THREE.Mesh(trackGeo, matDark);
         leftTrack.position.set(0, 0.17, -0.62);
@@ -96,7 +109,7 @@ export class Excavator3DManager {
         axle.position.set(0, 0.24, 0);
         rootGroup.add(axle);
 
-        // 2. Torretas y cabina superior
+        // Cabina y carrocería
         const upperBody = new THREE.Group();
         upperBody.position.set(0, 0.42, 0);
         rootGroup.add(upperBody);
@@ -117,7 +130,7 @@ export class Excavator3DManager {
         cabinRoof.position.set(0.18, 1.08, -0.26);
         upperBody.add(cabinRoof);
 
-        // 3. Brazo articulado (Boom + Stick + Garra/Pala)
+        // Brazo y Pala
         const boomPivot = new THREE.Group();
         boomPivot.position.set(0.45, 0.42, 0.24);
         upperBody.add(boomPivot);
@@ -141,7 +154,7 @@ export class Excavator3DManager {
         bucket.rotation.z = -0.3;
         stickPivot.add(bucket);
 
-        // Redimensionamiento responsivo automático
+        // Redimensionamiento automático
         const resizeObserver = new ResizeObserver(() => {
             const w = container.clientWidth;
             const h = container.clientHeight;
@@ -156,47 +169,150 @@ export class Excavator3DManager {
         return { container, scene, camera, renderer, rootGroup, ringMesh, boomPivot, stickPivot };
     }
 
+    buildConstructionSite(scene, THREE) {
+        // 1. Montículos de arena
+        const sandMat = new THREE.MeshStandardMaterial({ color: 0xe6ccb2, roughness: 0.95 });
+        const mounds = [
+            { x: -4.2, z: -3.2, r: 1.5, h: 1.05 },
+            { x: 4.5, z: -4.0, r: 1.8, h: 1.25 },
+            { x: -3.8, z: 4.4, r: 1.2, h: 0.85 }
+        ];
+        mounds.forEach((m) => {
+            const geo = new THREE.ConeGeometry(m.r, m.h, 24);
+            const mesh = new THREE.Mesh(geo, sandMat);
+            mesh.position.set(m.x, m.h / 2, m.z);
+            scene.add(mesh);
+        });
+
+        // 2. Tubos sueltos de drenaje apilados
+        const pipeMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.4, roughness: 0.45 });
+        const pipePositions = [
+            { x: -3.2, y: 0.22, z: 1.6 },
+            { x: -3.2, y: 0.22, z: 2.1 },
+            { x: -3.2, y: 0.6, z: 1.85 }
+        ];
+        pipePositions.forEach((p) => {
+            const pipeGeo = new THREE.CylinderGeometry(0.22, 0.22, 1.9, 18);
+            const pipe = new THREE.Mesh(pipeGeo, pipeMat);
+            pipe.rotation.z = Math.PI / 2;
+            pipe.position.set(p.x, p.y, p.z);
+            scene.add(pipe);
+        });
+
+        // 3. Conos viales naranjas con franja blanca
+        const coneMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.5 });
+        const stripeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const coneCoords = [
+            [2.6, 2.5], [3.4, 2.1], [2.2, 3.3], [-2.5, -2.6]
+        ];
+        coneCoords.forEach(([cx, cz]) => {
+            const group = new THREE.Group();
+            const cone = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.52, 16), coneMat);
+            cone.position.y = 0.26;
+            const stripe = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 0.12, 16), stripeMat);
+            stripe.position.y = 0.3;
+            group.add(cone, stripe);
+            group.position.set(cx, 0, cz);
+            scene.add(group);
+        });
+
+        // 4. Edificio en construcción al fondo
+        const bldgMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.7 });
+        const winMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.2 });
+        const building = new THREE.Mesh(new THREE.BoxGeometry(3.6, 6.2, 3.0), bldgMat);
+        building.position.set(-7.5, 3.1, -7.8);
+        scene.add(building);
+
+        for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 2; col++) {
+                const win = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.85, 0.1), winMat);
+                win.position.set(-8.2 + col * 1.35, 1.6 + row * 1.6, -6.28);
+                scene.add(win);
+            }
+        }
+
+        // 5. Grúa torre amarilla
+        const craneMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.3, roughness: 0.4 });
+        const mast = new THREE.Mesh(new THREE.BoxGeometry(0.38, 8.8, 0.38), craneMat);
+        mast.position.set(-4.8, 4.4, -7.5);
+        scene.add(mast);
+
+        const jib = new THREE.Mesh(new THREE.BoxGeometry(5.6, 0.28, 0.28), craneMat);
+        jib.position.set(-3.2, 8.6, -7.5);
+        scene.add(jib);
+
+        // 6. Nubes esponjosas en el cielo
+        const cloudMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95 });
+        const cloudClusters = [
+            [-6, 9.5, -10], [5, 10.2, -11], [9, 9.0, -4]
+        ];
+        cloudClusters.forEach(([x, y, z]) => {
+            const cGroup = new THREE.Group();
+            const p1 = new THREE.Mesh(new THREE.SphereGeometry(0.9, 14, 14), cloudMat);
+            const p2 = new THREE.Mesh(new THREE.SphereGeometry(0.7, 14, 14), cloudMat);
+            p2.position.set(0.85, -0.1, 0.2);
+            const p3 = new THREE.Mesh(new THREE.SphereGeometry(0.65, 14, 14), cloudMat);
+            p3.position.set(-0.8, -0.15, 0.1);
+            cGroup.add(p1, p2, p3);
+            cGroup.position.set(x, y, z);
+            scene.add(cGroup);
+        });
+    }
+
     bindOrbitControls() {
         this.containers.forEach((container) => {
             let dragging = false;
             let lastX = 0;
             let lastY = 0;
 
+            // Evita por completo que el navegador haga scroll al tocar el canvas en móvil
+            container.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+            container.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+
             container.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
                 dragging = true;
                 lastX = e.clientX;
                 lastY = e.clientY;
+                container.setPointerCapture?.(e.pointerId);
             });
 
-            window.addEventListener('pointermove', (e) => {
+            container.addEventListener('pointermove', (e) => {
                 if (!dragging) return;
+                e.preventDefault();
                 const dx = e.clientX - lastX;
                 const dy = e.clientY - lastY;
                 lastX = e.clientX;
                 lastY = e.clientY;
 
-                this.state.cameraOrbitYaw -= dx * 0.01;
-                this.state.cameraOrbitPitch = Math.max(0.18, Math.min(1.25, this.state.cameraOrbitPitch + dy * 0.008));
+                this.state.cameraOrbitYaw -= dx * 0.011;
+                this.state.cameraOrbitPitch = Math.max(0.16, Math.min(1.25, this.state.cameraOrbitPitch + dy * 0.009));
             });
 
-            window.addEventListener('pointerup', () => {
+            const stopDrag = (e) => {
                 dragging = false;
-            });
+                if (e.pointerId && container.hasPointerCapture?.(e.pointerId)) {
+                    container.releasePointerCapture(e.pointerId);
+                }
+            };
+
+            container.addEventListener('pointerup', stopDrag);
+            container.addEventListener('pointercancel', stopDrag);
         });
     }
 
     aplicarComando(etiqueta) {
         if (etiqueta === 'AVANZAR') {
-            this.state.linearSpeed = 0.035;
+            this.state.linearSpeed = 0.036;
             this.state.angularSpeed = 0;
         } else if (etiqueta === 'RETROCEDER') {
-            this.state.linearSpeed = -0.035;
+            this.state.linearSpeed = -0.036;
             this.state.angularSpeed = 0;
         } else if (etiqueta === 'IZQUIERDA') {
-            this.state.angularSpeed = 0.038;
+            this.state.angularSpeed = 0.04;
             this.state.linearSpeed = 0;
         } else if (etiqueta === 'DERECHA') {
-            this.state.angularSpeed = -0.038;
+            this.state.angularSpeed = -0.04;
             this.state.linearSpeed = 0;
         } else if (etiqueta === 'GIRO IZQ 90°') {
             this.state.headingRad += Math.PI / 2;
@@ -223,8 +339,8 @@ export class Excavator3DManager {
         this.state.armElevation = 0.5;
         this.state.linearSpeed = 0;
         this.state.angularSpeed = 0;
-        this.state.cameraOrbitYaw = 0.65;
-        this.state.cameraOrbitPitch = 0.48;
+        this.state.cameraOrbitYaw = 0.72;
+        this.state.cameraOrbitPitch = 0.44;
     }
 
     getTelemetry() {
@@ -240,14 +356,12 @@ export class Excavator3DManager {
     animate() {
         requestAnimationFrame(this.animate);
 
-        // Integrar movimiento continuo
         this.state.headingRad += this.state.angularSpeed;
         if (this.state.linearSpeed !== 0) {
             this.state.posX += Math.cos(this.state.headingRad) * this.state.linearSpeed;
             this.state.posZ -= Math.sin(this.state.headingRad) * this.state.linearSpeed;
-            // Mantener dentro de los límites de la plataforma
-            this.state.posX = Math.max(-5.5, Math.min(5.5, this.state.posX));
-            this.state.posZ = Math.max(-5.5, Math.min(5.5, this.state.posZ));
+            this.state.posX = Math.max(-5.2, Math.min(5.2, this.state.posX));
+            this.state.posZ = Math.max(-5.2, Math.min(5.2, this.state.posZ));
         }
 
         const targetBoomAngle = (this.state.armElevation - 0.5) * 0.75;
@@ -256,15 +370,14 @@ export class Excavator3DManager {
         this.scenes.forEach((item) => {
             item.rootGroup.position.set(this.state.posX, 0, this.state.posZ);
             item.rootGroup.rotation.y = this.state.headingRad;
-            item.ringMesh.position.set(this.state.posX, 0.01, this.state.posZ);
+            item.ringMesh.position.set(this.state.posX, 0.025, this.state.posZ);
 
             item.boomPivot.rotation.z += (targetBoomAngle - item.boomPivot.rotation.z) * 0.14;
             item.stickPivot.rotation.z += (targetStickAngle - item.stickPivot.rotation.z) * 0.14;
 
-            // Cámara orbital alrededor de la excavadora
             const radius = 5.6;
             const camX = this.state.posX + radius * Math.cos(this.state.cameraOrbitPitch) * Math.sin(this.state.cameraOrbitYaw);
-            const camY = radius * Math.sin(this.state.cameraOrbitPitch) + 0.5;
+            const camY = radius * Math.sin(this.state.cameraOrbitPitch) + 0.55;
             const camZ = this.state.posZ + radius * Math.cos(this.state.cameraOrbitPitch) * Math.cos(this.state.cameraOrbitYaw);
 
             item.camera.position.set(camX, camY, camZ);

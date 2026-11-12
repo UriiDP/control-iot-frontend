@@ -5,32 +5,32 @@
    ========================================================= */
 :root[data-theme="dark"] {
     --bg-canvas: #07080c;
-    --bg-card: linear-gradient(155deg, rgba(28, 32, 44, 0.62), rgba(14, 17, 24, 0.72));
-    --bg-subpanel: rgba(9, 11, 16, 0.62);
+    --bg-card: linear-gradient(155deg, rgba(28, 32, 44, 0.56), rgba(13, 16, 23, 0.68));
+    --bg-subpanel: rgba(9, 11, 16, 0.58);
     --border-glass: rgba(255, 255, 255, 0.12);
-    --border-specular: rgba(255, 255, 255, 0.28);
+    --border-specular: rgba(255, 255, 255, 0.30);
     --text-primary: #f4f6fb;
     --text-secondary: #929bb0;
     --shadow-card:
-        0 18px 42px rgba(0, 0, 0, 0.55),
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.18),
-        inset 0 -1px 0 0 rgba(255, 255, 255, 0.04);
+        0 18px 42px rgba(0, 0, 0, 0.52),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.22),
+        inset 0 -1px 0 0 rgba(255, 255, 255, 0.05);
 
     /* Liquid Glass Dock Oscuro */
-    --dock-bg: linear-gradient(180deg, rgba(46, 50, 64, 0.42), rgba(22, 25, 34, 0.58));
+    --dock-bg: linear-gradient(180deg, rgba(44, 48, 62, 0.45), rgba(19, 22, 30, 0.64));
     --dock-border: rgba(255, 255, 255, 0.24);
     --dock-shadow:
-        0 24px 50px rgba(0, 0, 0, 0.78),
+        0 20px 44px rgba(0, 0, 0, 0.78),
         inset 0 1.5px 1px rgba(255, 255, 255, 0.42),
         inset 0 -1.5px 2px rgba(56, 189, 248, 0.18);
 
-    /* Lente Líquido Deslizante (Translúcido con refracción) */
-    --lens-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.03) 55%, rgba(56, 189, 248, 0.12));
+    /* Cápsula Óptica Líquida (sin encimar badges) */
+    --lens-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.04) 60%, rgba(255, 183, 3, 0.14));
     --lens-shadow:
-        0 8px 20px rgba(0, 0, 0, 0.32),
-        inset 0 1.5px 1.5px rgba(255, 255, 255, 0.75),
+        0 6px 16px rgba(0, 0, 0, 0.32),
+        inset 0 1.5px 1.5px rgba(255, 255, 255, 0.78),
         inset 0 -1.5px 2px rgba(255, 183, 3, 0.45),
-        inset 2px 0 3px rgba(56, 189, 248, 0.35);
+        inset 1.5px 0 3px rgba(56, 189, 248, 0.35);
 
     /* Acentos */
     --amber: #ffb703;
@@ -47,32 +47,32 @@
 
 :root[data-theme="light"] {
     --bg-canvas: #e9edf4;
-    --bg-card: linear-gradient(155deg, rgba(255, 255, 255, 0.78), rgba(244, 247, 252, 0.66));
-    --bg-subpanel: rgba(235, 240, 248, 0.78);
+    --bg-card: linear-gradient(155deg, rgba(255, 255, 255, 0.74), rgba(244, 247, 252, 0.60));
+    --bg-subpanel: rgba(235, 240, 248, 0.74);
     --border-glass: rgba(15, 23, 42, 0.09);
-    --border-specular: rgba(255, 255, 255, 0.95);
+    --border-specular: rgba(255, 255, 255, 0.96);
     --text-primary: #0f172a;
     --text-secondary: #475569;
     --shadow-card:
         0 14px 34px rgba(15, 23, 42, 0.08),
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.95),
+        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.96),
         inset 0 -1px 0 0 rgba(15, 23, 42, 0.04);
 
     /* Liquid Glass Dock Claro */
-    --dock-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(238, 242, 249, 0.52));
-    --dock-border: rgba(255, 255, 255, 0.92);
+    --dock-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.65), rgba(238, 242, 249, 0.56));
+    --dock-border: rgba(255, 255, 255, 0.94);
     --dock-shadow:
-        0 18px 42px rgba(15, 23, 42, 0.16),
+        0 16px 38px rgba(15, 23, 42, 0.16),
         inset 0 1.5px 2px rgba(255, 255, 255, 1),
         inset 0 -1.5px 2px rgba(37, 99, 235, 0.12);
 
-    /* Lente Líquido Deslizante Claro */
-    --lens-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.25) 60%, rgba(56, 189, 248, 0.14));
+    /* Cápsula Óptica Líquida Clara */
+    --lens-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.28) 60%, rgba(255, 183, 3, 0.18));
     --lens-shadow:
-        0 6px 16px rgba(15, 23, 42, 0.12),
+        0 6px 14px rgba(15, 23, 42, 0.12),
         inset 0 1.5px 2px rgba(255, 255, 255, 1),
         inset 0 -1.5px 2px rgba(217, 119, 6, 0.35),
-        inset 2px 0 3px rgba(37, 99, 235, 0.25);
+        inset 1.5px 0 3px rgba(37, 99, 235, 0.25);
 
     /* Acentos */
     --amber: #d97706;
@@ -88,7 +88,7 @@
 }
 
 /* =========================================================
-   RESET Y LAYOUT FLEX PARA FOOTER HASTA ABAJO
+   RESET Y LAYOUT CON FOOTER EXCLUSIVO AL FINAL DEL SCROLL
    ========================================================= */
 * {
     margin: 0;
@@ -101,7 +101,7 @@
 body {
     background-color: var(--bg-canvas);
     color: var(--text-primary);
-    min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
@@ -150,12 +150,13 @@ body {
 }
 
 /* =========================================================
-   TARJETAS LIQUID GLASS
+   TARJETAS LIQUID GLASS CON REFLEJO ESPECULAR
    ========================================================= */
 .glass-card {
+    position: relative;
     background: var(--bg-card);
-    backdrop-filter: blur(28px) saturate(185%);
-    -webkit-backdrop-filter: blur(28px) saturate(185%);
+    backdrop-filter: blur(30px) saturate(190%);
+    -webkit-backdrop-filter: blur(30px) saturate(190%);
     border: 1px solid var(--border-glass);
     border-top-color: var(--border-specular);
     border-radius: 24px;
@@ -168,12 +169,12 @@ body {
    ========================================================= */
 .glass-header {
     max-width: 1320px;
-    margin: 16px auto 14px;
-    padding: 14px 22px;
-    width: calc(100% - 32px);
+    margin: 14px auto 12px;
+    padding: 13px 20px;
+    width: calc(100% - 28px);
     background: var(--bg-card);
-    backdrop-filter: blur(28px) saturate(185%);
-    -webkit-backdrop-filter: blur(28px) saturate(185%);
+    backdrop-filter: blur(30px) saturate(190%);
+    -webkit-backdrop-filter: blur(30px) saturate(190%);
     border: 1px solid var(--border-glass);
     border-top-color: var(--border-specular);
     border-radius: 24px;
@@ -184,24 +185,24 @@ body {
     gap: 12px;
 }
 
-.brand { display: flex; align-items: center; gap: 14px; }
+.brand { display: flex; align-items: center; gap: 13px; }
 
 .brand-icon {
-    width: 46px;
-    height: 46px;
-    border-radius: 15px;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
     background: var(--amber-soft);
     border: 1px solid var(--amber-glow);
     color: var(--amber);
     display: grid;
     place-items: center;
     flex-shrink: 0;
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35);
 }
 
-.brand-text h1 { font-size: 1.05rem; font-weight: 800; letter-spacing: 0.4px; color: var(--amber); }
-.brand-text p { font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px; }
-.header-actions { display: flex; align-items: center; gap: 10px; }
+.brand-text h1 { font-size: 1.02rem; font-weight: 800; letter-spacing: 0.4px; color: var(--amber); }
+.brand-text p { font-size: 0.76rem; color: var(--text-secondary); margin-top: 2px; }
+.header-actions { display: flex; align-items: center; gap: 9px; }
 
 .connection-badge {
     display: flex;
@@ -209,28 +210,14 @@ body {
     gap: 8px;
     padding: 7px 14px;
     border-radius: 999px;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 600;
     transition: all 0.3s ease;
 }
 
-.connection-badge.checking {
-    background: var(--amber-soft);
-    border: 1px solid var(--amber-glow);
-    color: var(--amber);
-}
-
-.connection-badge.online {
-    background: var(--green-soft);
-    border: 1px solid rgba(16, 185, 129, 0.35);
-    color: var(--green);
-}
-
-.connection-badge.offline {
-    background: var(--red-soft);
-    border: 1px solid rgba(244, 63, 94, 0.35);
-    color: var(--red);
-}
+.connection-badge.checking { background: var(--amber-soft); border: 1px solid var(--amber-glow); color: var(--amber); }
+.connection-badge.online { background: var(--green-soft); border: 1px solid rgba(16, 185, 129, 0.35); color: var(--green); }
+.connection-badge.offline { background: var(--red-soft); border: 1px solid rgba(244, 63, 94, 0.35); color: var(--red); }
 
 .pulse-dot {
     width: 8px;
@@ -247,14 +234,14 @@ body {
 }
 
 .glass-icon-btn {
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
+    width: 40px;
+    height: 40px;
+    border-radius: 13px;
     background: var(--bg-subpanel);
     border: 1px solid var(--border-glass);
     border-top-color: var(--border-specular);
     color: var(--amber);
-    font-size: 1.25rem;
+    font-size: 1.2rem;
     display: grid;
     place-items: center;
     cursor: pointer;
@@ -270,29 +257,29 @@ body {
    ========================================================= */
 .telemetry-bar {
     max-width: 1320px;
-    width: calc(100% - 32px);
-    margin: 0 auto 18px;
+    width: calc(100% - 28px);
+    margin: 0 auto 16px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
+    gap: 12px;
 }
 
 @media (max-width: 768px) {
-    .telemetry-bar { grid-template-columns: 1fr; gap: 10px; }
+    .telemetry-bar { grid-template-columns: 1fr; gap: 9px; }
     .connection-badge { display: none; }
-    .brand-text h1 { font-size: 0.95rem; }
+    .brand-text h1 { font-size: 0.92rem; }
 }
 
-.status-card { padding: 12px 16px; }
+.status-card { padding: 11px 15px; }
 
 .status-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-weight: 600;
     color: var(--text-secondary);
-    margin-bottom: 8px;
+    margin-bottom: 7px;
 }
 
 .status-pill-bar {
@@ -300,49 +287,49 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 7px 12px;
-    border-radius: 11px;
-    font-size: 0.82rem;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 0.8rem;
     font-weight: 700;
     transition: all 0.3s ease;
 }
 
-.status-pill-bar.checking {
-    background: var(--amber-soft);
-    color: var(--amber);
-    border: 1px solid var(--amber-glow);
-}
-
-.status-pill-bar.online {
-    background: var(--green-soft);
-    color: var(--green);
-    border: 1px solid rgba(16, 185, 129, 0.32);
-}
-
-.status-pill-bar.offline {
-    background: var(--red-soft);
-    color: var(--red);
-    border: 1px solid rgba(244, 63, 94, 0.32);
-}
+.status-pill-bar.checking { background: var(--amber-soft); color: var(--amber); border: 1px solid var(--amber-glow); }
+.status-pill-bar.online { background: var(--green-soft); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.32); }
+.status-pill-bar.offline { background: var(--red-soft); color: var(--red); border: 1px solid rgba(244, 63, 94, 0.32); }
 
 /* =========================================================
-   CONTENEDOR PRINCIPAL DE VISTAS
+   CONTENEDOR DE VISTAS (SIN APILAMIENTO AL CAMBIAR)
    ========================================================= */
 .app-viewport {
     flex: 1;
     max-width: 1320px;
-    width: calc(100% - 32px);
+    width: calc(100% - 28px);
     margin: 0 auto;
+    min-height: calc(100dvh - 155px); /* Empuja el footer debajo del pliegue inicial */
 }
 
 .view {
     display: none;
     opacity: 0;
-    transform: translateY(14px) scale(0.985);
-    transition: opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1), transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+    transform: translateY(8px);
 }
 
-.view.active { display: block; opacity: 1; transform: translateY(0) scale(1); }
+.view.active {
+    display: block;
+    animation: viewFadeIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes viewFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.99);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
 
 /* =========================================================
    GRID PRINCIPAL (SIMULACIÓN 3D + CONTROL MANUAL)
@@ -350,7 +337,7 @@ body {
 .control-dashboard-grid {
     display: grid;
     grid-template-columns: 1fr 1.12fr;
-    gap: 18px;
+    gap: 16px;
     align-items: stretch;
 }
 
@@ -361,7 +348,7 @@ body {
 .sim-card, .manual-card { overflow: hidden; display: flex; flex-direction: column; }
 
 .card-top-bar {
-    padding: 15px 20px;
+    padding: 14px 18px;
     border-bottom: 1px solid var(--border-glass);
     display: flex;
     justify-content: space-between;
@@ -371,14 +358,14 @@ body {
 
 .card-top-bar.highlight-amber { background: linear-gradient(90deg, var(--amber-soft), transparent 85%); }
 .card-title { display: flex; align-items: center; gap: 10px; }
-.card-title i { font-size: 1.35rem; color: var(--amber); }
-.card-title h2 { font-size: 1rem; font-weight: 700; }
+.card-title i { font-size: 1.3rem; color: var(--amber); }
+.card-title h2 { font-size: 0.98rem; font-weight: 700; }
 .sim-controls-mini { display: flex; align-items: center; gap: 8px; }
 
 .hint-pill {
-    font-size: 0.74rem;
+    font-size: 0.72rem;
     color: var(--text-secondary);
-    padding: 5px 10px;
+    padding: 4px 10px;
     border-radius: 999px;
     background: var(--bg-subpanel);
     border: 1px solid var(--border-glass);
@@ -395,14 +382,16 @@ body {
     color: var(--amber);
 }
 
-/* Vista Previa 3D WebGL */
+/* Vista Previa 3D WebGL con bloqueo estricto de scroll táctil en móvil */
 .viewport-3d-preview {
     flex: 1;
-    min-height: 310px;
+    min-height: 315px;
     position: relative;
-    background: radial-gradient(circle at center, rgba(56, 189, 248, 0.08), var(--bg-subpanel) 78%);
     overflow: hidden;
     cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .viewport-3d-preview:active { cursor: grabbing; }
@@ -412,6 +401,7 @@ body {
     display: block;
     width: 100% !important;
     height: 100% !important;
+    touch-action: none;
 }
 
 .hud-telemetry-overlay {
@@ -430,10 +420,10 @@ body {
     padding: 6px 10px;
     border-radius: 11px;
     background: var(--bg-card);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     border: 1px solid var(--border-glass);
-    font-size: 0.74rem;
+    font-size: 0.73rem;
     display: flex;
     justify-content: space-between;
     color: var(--text-secondary);
@@ -442,7 +432,7 @@ body {
 .hud-chip strong { font-family: 'JetBrains Mono', monospace; color: var(--text-primary); }
 
 .console-log-bar {
-    padding: 11px 18px;
+    padding: 10px 16px;
     border-top: 1px solid var(--border-glass);
     background: var(--bg-subpanel);
     display: flex;
@@ -450,19 +440,19 @@ body {
     align-items: center;
     gap: 12px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.76rem;
+    font-size: 0.75rem;
     color: var(--amber);
 }
 
 /* =========================================================
    CONTROLES MANUALES Y JOYSTICK
    ========================================================= */
-.manual-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.manual-body { padding: 18px; display: flex; flex-direction: column; gap: 15px; }
 
 .joystick-and-actions {
     display: grid;
     grid-template-columns: 1fr 1.15fr;
-    gap: 18px;
+    gap: 16px;
     align-items: center;
 }
 
@@ -517,20 +507,20 @@ body {
 .actuators-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
 .glass-btn {
-    padding: 12px 14px;
+    padding: 12px 13px;
     border-radius: 15px;
     background: var(--bg-subpanel);
     border: 1px solid var(--border-glass);
     border-top-color: var(--border-specular);
     color: var(--text-primary);
-    font-size: 0.84rem;
+    font-size: 0.83rem;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 7px;
     cursor: pointer;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
     transition: transform 0.14s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
@@ -539,7 +529,7 @@ body {
 .glass-btn.amber-solid { background: var(--amber); color: #0b0d12; border: none; font-weight: 700; }
 
 .sequences-box {
-    padding: 14px;
+    padding: 13px;
     border-radius: 16px;
     background: var(--bg-subpanel);
     border: 1px solid var(--border-glass);
@@ -549,10 +539,10 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 600;
     color: var(--text-secondary);
-    margin-bottom: 10px;
+    margin-bottom: 9px;
 }
 
 .sequence-row { display: flex; gap: 10px; }
@@ -564,7 +554,7 @@ body {
     background: var(--bg-card);
     border: 1px solid var(--border-glass);
     color: var(--text-primary);
-    font-size: 0.85rem;
+    font-size: 0.84rem;
     outline: none;
 }
 
@@ -575,7 +565,7 @@ body {
     background: var(--red-gradient);
     border: 1px solid rgba(255, 255, 255, 0.28);
     color: #ffffff;
-    font-size: 0.95rem;
+    font-size: 0.94rem;
     font-weight: 800;
     letter-spacing: 0.6px;
     box-shadow: 0 10px 25px rgba(225, 29, 72, 0.38);
@@ -584,17 +574,143 @@ body {
 .stop-emergency-btn:hover { border-color: #ffffff; filter: brightness(1.06); }
 
 /* =========================================================
+   PESTAÑA MONITOREO Y HISTORIAL RDS
+   ========================================================= */
+.monitoring-grid {
+    display: grid;
+    grid-template-columns: 0.92fr 1.25fr;
+    gap: 16px;
+    align-items: stretch;
+}
+
+@media (max-width: 960px) {
+    .monitoring-grid { grid-template-columns: 1fr; }
+}
+
+.monitor-card { display: flex; flex-direction: column; overflow: hidden; }
+.monitor-hero-body { padding: 20px; display: flex; flex-direction: column; gap: 18px; flex: 1; justify-content: space-between; }
+
+.last-move-display {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border-radius: 18px;
+    background: var(--bg-subpanel);
+    border: 1px solid var(--border-glass);
+}
+
+.pulse-wave-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    background: var(--amber-soft);
+    border: 1px solid var(--amber-glow);
+    color: var(--amber);
+    font-size: 1.8rem;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+
+.micro-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: var(--text-secondary);
+}
+
+.last-move-info h3 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin-top: 4px;
+    color: var(--text-primary);
+    letter-spacing: 0.3px;
+}
+
+.meta-specs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.meta-box {
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: var(--bg-subpanel);
+    border: 1px solid var(--border-glass);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.meta-box span {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    color: var(--text-secondary);
+}
+
+.meta-box strong {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.92rem;
+    color: var(--amber);
+}
+
+.history-table-wrapper {
+    padding: 12px 18px;
+    overflow-x: auto;
+    flex: 1;
+}
+
+.glass-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+
+.glass-table th {
+    text-align: left;
+    padding: 10px 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    color: var(--amber);
+    border-bottom: 1px solid var(--border-glass);
+}
+
+.glass-table td {
+    padding: 10px 10px;
+    border-bottom: 1px solid var(--border-glass);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+}
+
+.glass-table tr:last-child td { border-bottom: none; }
+.table-empty-msg { text-align: center; padding: 28px 12px !important; color: var(--text-secondary); }
+
+.monitor-footnote {
+    padding: 12px 18px;
+    border-top: 1px solid var(--border-glass);
+    background: var(--bg-subpanel);
+    font-size: 0.73rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+
+/* =========================================================
    VISTAS SECUNDARIAS (3D FULL, VOZ IA, GESTOS)
    ========================================================= */
-.full-panel { min-height: 490px; display: flex; flex-direction: column; overflow: hidden; }
+.full-panel { min-height: 500px; display: flex; flex-direction: column; overflow: hidden; }
 
 .full-3d-stage {
     flex: 1;
-    min-height: 430px;
+    min-height: 440px;
     position: relative;
-    background: radial-gradient(circle, rgba(56, 189, 248, 0.1), var(--bg-subpanel));
     overflow: hidden;
     cursor: grab;
+    touch-action: none;
+    user-select: none;
 }
 
 .full-3d-stage:active { cursor: grabbing; }
@@ -612,7 +728,7 @@ body {
     letter-spacing: 0.8px;
 }
 
-.muted-desc { max-width: 480px; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; }
+.muted-desc { max-width: 500px; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; }
 .mic-orb-wrapper { position: relative; width: 130px; height: 130px; display: grid; place-items: center; margin: 14px 0; }
 
 .mic-trigger-btn {
@@ -632,13 +748,14 @@ body {
 }
 
 .mic-trigger-btn:hover { transform: scale(1.06); }
+.mic-orb-wrapper.listening .mic-trigger-btn { background: var(--red-gradient); color: #ffffff; box-shadow: 0 12px 30px rgba(225, 29, 72, 0.45); }
 .mic-wave { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--amber); opacity: 0; }
-.mic-orb-wrapper.listening .wave-1 { animation: rippleWave 1.8s infinite; }
-.mic-orb-wrapper.listening .wave-2 { animation: rippleWave 1.8s 0.6s infinite; }
+.mic-orb-wrapper.listening .wave-1 { animation: rippleWave 1.8s infinite; border-color: var(--red); }
+.mic-orb-wrapper.listening .wave-2 { animation: rippleWave 1.8s 0.6s infinite; border-color: var(--red); }
 
 @keyframes rippleWave {
-    0% { transform: scale(0.65); opacity: 0.8; }
-    100% { transform: scale(1.35); opacity: 0; }
+    0% { transform: scale(0.65); opacity: 0.85; }
+    100% { transform: scale(1.4); opacity: 0; }
 }
 
 .transcript-box {
@@ -655,8 +772,8 @@ body {
 
 .camera-viewport {
     flex: 1;
-    min-height: 360px;
-    margin: 20px;
+    min-height: 380px;
+    margin: 18px;
     border-radius: 18px;
     background: var(--bg-subpanel);
     border: 1px dashed var(--border-glass);
@@ -666,35 +783,54 @@ body {
     position: relative;
 }
 
-.camera-placeholder { text-align: center; padding: 24px; max-width: 380px; }
+.camera-viewport video {
+    width: 100%;
+    max-height: 410px;
+    object-fit: cover;
+    border-radius: 16px;
+    transform: scaleX(-1); /* Vista espejo natural */
+}
+
+.gesture-hud-overlay {
+    position: absolute;
+    bottom: 14px;
+    left: 14px;
+    right: 14px;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.camera-placeholder { text-align: center; padding: 24px; max-width: 390px; }
 .camera-placeholder i { font-size: 3.2rem; color: var(--text-secondary); margin-bottom: 10px; }
-.camera-placeholder p { font-size: 0.84rem; color: var(--text-secondary); margin-top: 6px; }
+.camera-placeholder p { font-size: 0.84rem; color: var(--text-secondary); margin-top: 6px; line-height: 1.45; }
 
 /* =========================================================
-   PIE DE PÁGINA HASTA ABAJO DEL DOCUMENTO
+   PIE DE PÁGINA HASTA EL FINAL DEL SCROLL
    ========================================================= */
 .app-footer {
-    margin-top: auto;
+    margin-top: 48px;
     width: 100%;
-    padding: 24px 16px 108px; /* Deja espacio limpio debajo para la barra flotante */
+    padding: 20px 16px calc(92px + env(safe-area-inset-bottom, 0px));
     text-align: center;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
+    border-top: 1px solid var(--border-glass);
 }
 
 .app-footer strong { color: var(--amber); font-weight: 600; }
 
 /* =========================================================
-   BARRA INFERIOR LIQUID GLASS REAL (ÓPTICA + REFRACCIÓN)
+   BARRA INFERIOR LIQUID GLASS REAL (PEGADA ABAJO, SIN SOLAPAR)
    ========================================================= */
 .liquid-dock-wrapper {
     position: fixed;
-    bottom: 18px;
+    bottom: max(10px, env(safe-area-inset-bottom, 10px));
     left: 0;
     right: 0;
     display: flex;
     justify-content: center;
-    padding: 0 14px;
+    padding: 0 10px;
     z-index: 1000;
     pointer-events: none;
 }
@@ -704,8 +840,8 @@ body {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 7px 9px;
+    gap: 2px;
+    padding: 6px 8px;
     border-radius: 999px;
     background: var(--dock-bg);
     backdrop-filter: blur(36px) saturate(215%);
@@ -713,6 +849,7 @@ body {
     border: 1px solid var(--dock-border);
     box-shadow: var(--dock-shadow);
     overflow: hidden;
+    max-width: 100%;
 }
 
 .glass-specular-top {
@@ -735,44 +872,50 @@ body {
     pointer-events: none;
 }
 
-/* Lente óptico translúcido: aplica refracción SVG + blur sobre los íconos debajo */
+/* Cápsula líquida translúcida con desenfoque dinámico durante el desplazamiento */
 .liquid-lens {
     position: absolute;
-    top: 6px;
-    bottom: 6px;
-    left: 9px;
-    width: 78px;
+    top: 5px;
+    bottom: 5px;
+    left: 0;
+    width: 72px;
     border-radius: 999px;
     background: var(--lens-bg);
-    backdrop-filter: url(#liquid-glass-refraction) blur(6px) saturate(190%) brightness(1.18);
-    -webkit-backdrop-filter: blur(10px) saturate(190%) brightness(1.18);
+    backdrop-filter: blur(10px) saturate(190%) brightness(1.16);
+    -webkit-backdrop-filter: blur(10px) saturate(190%) brightness(1.16);
     box-shadow: var(--lens-shadow);
     transition:
-        transform 0.46s cubic-bezier(0.32, 1.38, 0.58, 1),
-        width 0.35s ease;
-    z-index: 3; /* Encima de los íconos para refractarlos al pasar sobre ellos */
+        transform 0.44s cubic-bezier(0.32, 1.32, 0.58, 1),
+        width 0.34s ease,
+        backdrop-filter 0.25s ease;
+    z-index: 1;
     pointer-events: none;
     overflow: hidden;
 }
 
-/* Borde cromático iridiscente interno del lente */
+/* Al desplazarse entre menús activa refracción óptica + mayor blur */
+.liquid-lens.sliding {
+    backdrop-filter: url(#liquid-glass-refraction) blur(16px) saturate(220%) brightness(1.24);
+    -webkit-backdrop-filter: blur(16px) saturate(220%) brightness(1.24);
+}
+
 .lens-chromatic-rim {
     position: absolute;
     inset: 0;
     border-radius: 999px;
     padding: 1.2px;
-    background: linear-gradient(125deg, rgba(255, 255, 255, 0.85), rgba(56, 189, 248, 0.45) 35%, rgba(255, 183, 3, 0.55) 70%, rgba(255, 255, 255, 0.8));
+    background: linear-gradient(125deg, rgba(255, 255, 255, 0.88), rgba(56, 189, 248, 0.45) 35%, rgba(255, 183, 3, 0.55) 70%, rgba(255, 255, 255, 0.85));
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
-    opacity: 0.9;
+    opacity: 0.92;
 }
 
 .dock-item {
     position: relative;
-    z-index: 2; /* Debajo del lente para que el lente refracte el ícono al pasar */
-    width: 78px;
-    padding: 7px 4px;
+    z-index: 2;
+    width: 72px;
+    padding: 8px 2px 6px;
     border: none;
     background: transparent;
     color: var(--text-secondary);
@@ -785,31 +928,31 @@ body {
     transition: color 0.25s ease, transform 0.25s ease;
 }
 
-@media (max-width: 400px) {
-    .dock-item { width: 68px; }
-    .liquid-lens { width: 68px; }
+@media (max-width: 410px) {
+    .dock-item { width: 62px; }
+    .dock-item span { font-size: 0.62rem; }
 }
 
 .dock-item:active { transform: scale(0.92); }
 
 .dock-icon {
     position: relative;
-    font-size: 1.42rem;
+    font-size: 1.32rem;
     line-height: 1;
     transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.dock-item span { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.2px; }
+.dock-item span { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.15px; }
 
 .dock-badge {
     position: absolute;
-    top: -4px;
-    right: -12px;
-    padding: 1px 5px;
+    top: -5px;
+    right: -13px;
+    padding: 1px 4px;
     border-radius: 999px;
     background: var(--green);
     color: #051b11;
-    font-size: 0.52rem;
+    font-size: 0.48rem;
     font-weight: 800;
     box-shadow: 0 2px 6px rgba(16, 185, 129, 0.5);
 }
@@ -824,6 +967,6 @@ body {
 
 .dock-item.active .dock-icon {
     color: var(--amber);
-    transform: translateY(-2px) scale(1.12);
+    transform: translateY(-1px) scale(1.08);
     filter: drop-shadow(0 0 8px var(--amber-glow));
 }

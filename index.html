@@ -2,7 +2,7 @@
 <html lang="es" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Control Excavadora IoT • Panel Avanzado</title>
 
     <!-- Favicon Vectorial Personalizado (Excavadora Geométrica) -->
@@ -18,10 +18,10 @@
     <!-- Filtro SVG Óptico para Refracción Liquid Glass -->
     <svg width="0" height="0" style="position: absolute; pointer-events: none;" aria-hidden="true">
         <defs>
-            <filter id="liquid-glass-refraction" x="-15%" y="-15%" width="130%" height="130%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.018 0.025" numOctaves="2" seed="7" result="noise"/>
-                <feGaussianBlur in="noise" stdDeviation="2.2" result="smoothNoise"/>
-                <feDisplacementMap in="SourceGraphic" in2="smoothNoise" scale="7" xChannelSelector="R" yChannelSelector="G"/>
+            <filter id="liquid-glass-refraction" x="-10%" y="-10%" width="120%" height="120%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.015 0.02" numOctaves="2" seed="9" result="noise"/>
+                <feGaussianBlur in="noise" stdDeviation="2.5" result="smoothNoise"/>
+                <feDisplacementMap in="SourceGraphic" in2="smoothNoise" scale="5" xChannelSelector="R" yChannelSelector="G"/>
             </filter>
         </defs>
     </svg>
@@ -50,7 +50,7 @@
             </div>
             <div class="brand-text">
                 <h1>CONTROL EXCAVADORA IoT</h1>
-                <p>Vehículo ID: <strong>1</strong> • Control • Telemetría 3D • IA</p>
+                <p>Vehículo ID: <strong>1</strong> • Control • Monitoreo • 3D • IA</p>
             </div>
         </div>
 
@@ -108,12 +108,12 @@
     <main class="app-viewport">
 
         <!-- =========================================================
-             PESTAÑA 1: CONTROL PRINCIPAL + SIMULACIÓN 3D EN VIVO
+             PESTAÑA 1: CONTROL PRINCIPAL + SIMULACIÓN 3D EN OBRA
              ========================================================= -->
         <section id="view-control" class="view active">
             <div class="control-dashboard-grid">
 
-                <!-- Columna Izquierda: Simulación 3D Real (Three.js) -->
+                <!-- Columna Izquierda: Simulación 3D Real (Escenario Construcción) -->
                 <div class="glass-card sim-card">
                     <div class="card-top-bar">
                         <div class="card-title">
@@ -121,7 +121,7 @@
                             <h2>Simulación 3D en Tiempo Real</h2>
                         </div>
                         <div class="sim-controls-mini">
-                            <button class="glass-icon-btn mini" id="btn-reset-3d" title="Centrar excavadora 3D">
+                            <button class="glass-icon-btn mini" id="btn-reset-3d" title="Centrar cámara 3D">
                                 <i class="bx bx-reset"></i>
                             </button>
                             <button class="glass-icon-btn mini" id="btn-expand-3d" title="Abrir vista 3D completa">
@@ -131,7 +131,7 @@
                     </div>
 
                     <div class="viewport-3d-preview" id="preview-3d-container">
-                        <!-- Aquí Three.js monta el canvas WebGL 3D -->
+                        <!-- Three.js monta aquí el canvas WebGL 3D con bloqueo de scroll táctil -->
                         <div class="hud-telemetry-overlay">
                             <div class="hud-chip"><span>Rumbo:</span> <strong id="hud-angle">0°</strong></div>
                             <div class="hud-chip"><span>Brazo:</span> <strong id="hud-arm">50%</strong></div>
@@ -226,17 +226,109 @@
         </section>
 
         <!-- =========================================================
-             PESTAÑA 2: GEMELO DIGITAL 3D (PANTALLA COMPLETA)
+             PESTAÑA 2: MONITOREO Y TELEMETRÍA RDS (NUEVA)
+             ========================================================= -->
+        <section id="view-monitoring" class="view">
+            <div class="monitoring-grid">
+
+                <!-- Tarjeta Izquierda: Último Movimiento en Tiempo Real -->
+                <div class="glass-card monitor-card">
+                    <div class="card-top-bar highlight-amber">
+                        <div class="card-title">
+                            <i class="bx bx-pulse text-amber"></i>
+                            <h2>Último Movimiento</h2>
+                        </div>
+                        <span class="direction-badge" id="mon-live-badge">EN VIVO</span>
+                    </div>
+
+                    <div class="monitor-hero-body">
+                        <div class="last-move-display">
+                            <div class="pulse-wave-icon">
+                                <i class="bx bx-activity"></i>
+                            </div>
+                            <div class="last-move-info">
+                                <span class="micro-label">ACCIÓN REGISTRADA</span>
+                                <h3 id="mon-last-action">SIN DATOS ACTUALIZADOS</h3>
+                            </div>
+                        </div>
+
+                        <div class="meta-specs-grid">
+                            <div class="meta-box">
+                                <span>VEHÍCULO</span>
+                                <strong id="mon-vehiculo">ID #1</strong>
+                            </div>
+                            <div class="meta-box">
+                                <span>CÓDIGO</span>
+                                <strong id="mon-codigo">—</strong>
+                            </div>
+                            <div class="meta-box">
+                                <span>FECHA</span>
+                                <strong id="mon-fecha">—</strong>
+                            </div>
+                            <div class="meta-box">
+                                <span>HORA</span>
+                                <strong id="mon-hora">—</strong>
+                            </div>
+                        </div>
+
+                        <div class="console-log-bar" style="border-radius: 14px; border: 1px solid var(--border-glass);">
+                            <span id="mon-origin-text">Esperando eventos desde WebSocket / RDS...</span>
+                            <button class="glass-icon-btn mini" id="btn-reload-history" title="Actualizar historial RDS">
+                                <i class="bx bx-refresh"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta Derecha: Últimos 10 Movimientos Individuales (RDS) -->
+                <div class="glass-card monitor-card">
+                    <div class="card-top-bar">
+                        <div class="card-title">
+                            <i class="bx bx-list-ol text-blue"></i>
+                            <h2>Últimos 10 Movimientos Individuales</h2>
+                        </div>
+                        <span class="hint-pill">MySQL RDS</span>
+                    </div>
+
+                    <div class="history-table-wrapper">
+                        <table class="glass-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>MOVIMIENTO</th>
+                                    <th>ORIGEN</th>
+                                    <th>FECHA</th>
+                                    <th>HORA</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                                <tr>
+                                    <td colspan="5" class="table-empty-msg">Consultando registros en Amazon RDS...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="monitor-footnote">
+                        Registros persistidos en Amazon RDS y consultados vía FastAPI; el WebSocket notifica cambios al instante en hora local (America/Mexico_City).
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- =========================================================
+             PESTAÑA 3: GEMELO DIGITAL 3D (PANTALLA COMPLETA)
              ========================================================= -->
         <section id="view-3d" class="view">
             <div class="glass-card full-panel">
                 <div class="card-top-bar">
                     <div class="card-title">
                         <i class="bx bx-cube text-blue"></i>
-                        <h2>Gemelo Digital 3D • Vista Interactiva 360°</h2>
+                        <h2>Gemelo Digital 3D • Zona de Construcción 360°</h2>
                     </div>
                     <div class="sim-controls-mini">
-                        <span class="hint-pill">Arrastra para rotar cámara</span>
+                        <span class="hint-pill">Desliza para rotar cámara</span>
                         <button class="glass-icon-btn mini" id="btn-reset-3d-full" title="Centrar cámara">
                             <i class="bx bx-reset"></i>
                         </button>
@@ -254,31 +346,31 @@
         </section>
 
         <!-- =========================================================
-             PESTAÑA 3: CONTROL POR VOZ IA
+             PESTAÑA 4: CONTROL POR VOZ IA (PERMISOS REALES)
              ========================================================= -->
         <section id="view-voice" class="view">
             <div class="glass-card full-panel center-stage">
                 <div class="ai-badge"><i class="bx bx-sparkles"></i> ASISTENTE NEURAL DE VOZ</div>
                 <h2>Control por Comandos de Voz</h2>
-                <p class="muted-desc">Pulsa el micrófono y dicta una orden: <em>"Avanzar"</em>, <em>"Subir garra"</em>, <em>"Giro izquierda"</em> o <em>"Detener"</em>.</p>
+                <p class="muted-desc">Pulsa el micrófono para otorgar permiso y dicta una orden: <em>"Avanzar"</em>, <em>"Retroceder"</em>, <em>"Subir garra"</em>, <em>"Bajar garra"</em>, <em>"Izquierda"</em>, <em>"Derecha"</em> o <em>"Detener"</em>.</p>
 
                 <div class="mic-orb-wrapper" id="mic-orb-wrapper">
                     <div class="mic-wave wave-1"></div>
                     <div class="mic-wave wave-2"></div>
                     <button id="btn-voice-mic" class="mic-trigger-btn" aria-label="Activar micrófono">
-                        <i class="bx bxs-microphone"></i>
+                        <i class="bx bxs-microphone" id="mic-btn-icon"></i>
                     </button>
                 </div>
 
                 <div class="transcript-box" id="voice-transcript-box">
-                    <span class="transcript-label">Transcripción en vivo:</span>
-                    <p id="voice-transcript-text">En espera de activación...</p>
+                    <span class="transcript-label" id="voice-status-label">Estado del micrófono: Inactivo</span>
+                    <p id="voice-transcript-text">Toca el botón amarillo para iniciar el reconocimiento de voz.</p>
                 </div>
             </div>
         </section>
 
         <!-- =========================================================
-             PESTAÑA 4: CONTROL POR GESTOS (VISIÓN ARTIFICIAL)
+             PESTAÑA 5: CONTROL POR GESTOS (CÁMARA REAL PC/MÓVIL)
              ========================================================= -->
         <section id="view-gestures" class="view">
             <div class="glass-card full-panel">
@@ -288,17 +380,22 @@
                         <h2>Control Espacial por Gestos (Cámara)</h2>
                     </div>
                     <button id="btn-toggle-camera" class="glass-btn amber-solid">
-                        <i class="bx bx-video"></i> Activar Cámara
+                        <i class="bx bx-video"></i> <span>Activar Cámara</span>
                     </button>
                 </div>
 
                 <div class="camera-viewport" id="gesture-camera-container">
-                    <video id="gesture-video" autoplay playsinline muted style="display: none; width: 100%; max-height: 360px; border-radius: 14px;"></video>
+                    <video id="gesture-video" autoplay playsinline muted style="display: none;"></video>
                     <canvas id="gesture-canvas" style="display: none;"></canvas>
+
+                    <div class="gesture-hud-overlay" id="gesture-hud-overlay" style="display: none;">
+                        <span class="direction-badge" id="gesture-detected-label">ANALIZANDO MOVIMIENTO...</span>
+                    </div>
+
                     <div class="camera-placeholder" id="camera-placeholder">
-                        <i class="bx bx-camera-off"></i>
-                        <h3>Cámara Desactivada</h3>
-                        <p>Activa la cámara de tu computadora o celular para controlar la excavadora con movimientos de mano.</p>
+                        <i class="bx bx-camera-off" id="camera-placeholder-icon"></i>
+                        <h3 id="camera-placeholder-title">Cámara Desactivada</h3>
+                        <p id="camera-placeholder-desc">Pulsa "Activar Cámara" para solicitar permiso al navegador y controlar la excavadora con gestos de mano.</p>
                     </div>
                 </div>
             </div>
@@ -307,7 +404,7 @@
     </main>
 
     <!-- =========================================================
-         PIE DE PÁGINA FIJO HASTA ABAJO DEL DOCUMENTO
+         PIE DE PÁGINA (SOLO VISIBLE AL SCROLLEAR HASTA ABAJO)
          ========================================================= -->
     <footer class="app-footer">
         <p>Desarrollado por <strong>Uriel Durán Peralta</strong> • 2026</p>
@@ -321,7 +418,7 @@
             <div class="glass-specular-top"></div>
             <div class="glass-specular-bottom"></div>
 
-            <!-- Lente óptico translúcido con refracción y blur dinámico -->
+            <!-- Cápsula óptica translúcida con desenfoque dinámico y borde iridiscente -->
             <div class="liquid-lens" id="liquid-lens">
                 <div class="lens-chromatic-rim"></div>
             </div>
@@ -329,6 +426,11 @@
             <button class="dock-item active" data-target="view-control">
                 <div class="dock-icon"><i class="bx bxs-joystick"></i></div>
                 <span>Control</span>
+            </button>
+
+            <button class="dock-item" data-target="view-monitoring">
+                <div class="dock-icon"><i class="bx bx-bar-chart-alt-2"></i></div>
+                <span>Monitoreo</span>
             </button>
 
             <button class="dock-item" data-target="view-3d">

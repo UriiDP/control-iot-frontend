@@ -6,6 +6,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const WS_URL = 'wss://control-iot-uriel.duckdns.org/ws/1';
     const ID_VEHICULO = 1;
 
+    const NOMBRES_COMANDOS = {
+        0: 'DETENER (STOP)',
+        11: 'AVANZAR',
+        12: 'RETROCEDER',
+        13: 'IZQUIERDA',
+        14: 'DERECHA',
+        15: 'SUBIR GARRA',
+        16: 'BAJAR GARRA',
+        17: 'GIRO IZQ 90°',
+        18: 'GIRO DER 90°',
+        20: 'EJECUCIÓN DEMO'
+    };
+
     // =========================================================
     // 1. INICIALIZAR MOTOR 3D REAL (THREE.JS)
     // =========================================================
@@ -84,13 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const resp = await fetch(`${BASE_URL}/vehiculos`, { signal: controller.signal });
             clearTimeout(timeoutId);
 
-            // Si responde el servidor FastAPI, EC2 está arriba
             apiOnline = true;
             setBadgeState('api-status-bar', 'api-status-icon', 'api-status', 'online', 'EC2 Activa', 'bx bx-check-circle');
 
             if (resp.ok) {
                 const data = await resp.json();
-                // Si no hay error de base de datos, Amazon RDS respondió correctamente
                 if (data && data.status !== 'error') {
                     rdsOnline = true;
                     setBadgeState('rds-status-bar', 'rds-status-icon', 'rds-status', 'online', 'RDS Conectada', 'bx bx-check-circle');
@@ -112,7 +123,79 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =========================================================
-    // 3. CONEXIÓN WEBSOCKET REAL (SIN FALSOS POSITIVOS)
+    // 3. PESTAÑA DE MONITOREO E HISTORIAL RDS
+    // =========================================================
+    function actualizarPanelUltimoMovimiento(codigo, nombreAccion, origen = 'WEB') {
+        const now = new Date();
+        const actionEl = document.getElementById('mon-last-action');
+        const codeEl = document.getElementById('mon-codigo');
+        const dateEl = document.getElementById('mon-fecha');
+        const timeEl = document.getElementById('mon-hora');
+        const originEl = document.getElementById('mon-origin-text');
+
+        if (actionEl) actionEl.textContent = nombreAccion || NOMBRES_COMANDOS[codigo] || `COMANDO #${codigo}`;
+        if (codeEl) codeEl.textContent = codigo !== undefined ? `#${codigo}` : '—';
+        if (dateEl) dateEl.textContent = now.toLocaleDateString('es-MX');
+        if (timeEl) timeEl.textContent = now.toLocaleTimeString('es-MX');
+        if (originEl) originEl.textContent = `Origen: ${origen} • Sincronizado en tiempo real`;
+    }
+
+    async function cargarHistorialRDS() {
+        const tbody = document.getElementById('history-table-body');
+        if (!tbody) return;
+
+        try {
+            const resp = await fetch(`${BASE_URL}/vehiculos/${ID_VEHICULO}/historial`);
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const data = await resp.json();
+            const registros = Array.isArray(data) ? data : (data.historial || data.datos || []);
+
+            if (registros.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="table-empty-msg">Sin movimientos individuales registrados aún en RDS.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = registros.slice(0, 10).map((item, index) => {
+                const cod = item.id_comando ?? item.codigo ?? '—';
+                const mov = item.nombre_comando || item.movimiento || NOMBRES_COMANDOS[cod] || `Comando ${cod}`;
+                const orig = item.origen || 'WEB';
+                const rawFecha = item.fecha_hora || item.fecha || '';
+                let fechaStr = 'Hoy';
+                let horaStr = '—';
+
+                if (rawFecha) {
+                    const parsed = new Date(rawFecha.endsWith('Z') ? rawFecha : `${rawFecha}Z`);
+                    if (!isNaN(parsed)) {
+                        fechaStr = parsed.toLocaleDateString('es-MX');
+                        horaStr = parsed.toLocaleTimeString('es-MX');
+                    } else {
+                        fechaStr = rawFecha;
+                    }
+                }
+
+                if (index === 0) {
+                    actualizarPanelUltimoMovimiento(cod, mov, orig);
+                }
+
+                return `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><strong>${mov}</strong></td>
+                        <td>${orig}</td>
+                        <td>${fechaStr}</td>
+                        <td>${horaStr}</td>
+                    </tr>
+                `;
+            }).join('');
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="5" class="table-empty-msg">No se pudo leer el historial de RDS (${err.message}).</td></tr>`;
+        }
+    }
+
+    document.getElementById('btn-reload-history')?.addEventListener('click', cargarHistorialRDS);
+
+    // =========================================================
+    // 4. CONEXIÓN WEBSOCKET REAL
     // =========================================================
     let socket = null;
     let reconnectTimer = null;
@@ -134,6 +217,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             socket.onmessage = (event) => {
                 registrarEvento(`WSS ← ${event.data}`);
+                try {
+                    const payload = JSON.parse(event.data);
+                    if (payload && payload.id_comando !== undefined) {
+                        const etiqueta = NOMBRES_COMANDOS[payload.id_comando] || `CMD ${payload.id_comando}`;
+                        sim3D.aplicarComando(etiqueta);
+                        actualizarPanelUltimoMovimiento(payload.id_comando, etiqueta, payload.origen || 'WSS');
+                        cargarHistorialRDS();
+                    }
+                } catch (_) {}
             };
 
             socket.onerror = () => {
@@ -156,23 +248,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     verificarSaludBackend();
     conectarWebSocket();
+    cargarHistorialRDS();
 
-    const btnRefresh = document.getElementById('btn-refresh-status');
-    if (btnRefresh) {
-        btnRefresh.addEventListener('click', () => {
-            verificarSaludBackend();
-            if (!wsOnline) conectarWebSocket();
-        });
-    }
+    document.getElementById('btn-refresh-status')?.addEventListener('click', () => {
+        verificarSaludBackend();
+        cargarHistorialRDS();
+        if (!wsOnline) conectarWebSocket();
+    });
 
     // =========================================================
-    // 4. ENVÍO DE COMANDOS REALES A FASTAPI + SIMULACIÓN 3D
+    // 5. ENVÍO DE COMANDOS A FASTAPI + SIMULACIÓN 3D
     // =========================================================
-    async function enviarComando(idComando, etiqueta) {
+    async function enviarComando(idComando, etiqueta, origen = 'WEB') {
         sim3D.aplicarComando(etiqueta);
         if (hudState) hudState.textContent = etiqueta;
         if (directionBadge) directionBadge.textContent = etiqueta;
         registrarEvento(`Comando [${idComando}]: ${etiqueta}`);
+        actualizarPanelUltimoMovimiento(idComando, etiqueta, origen);
 
         try {
             const resp = await fetch(`${BASE_URL}/vehiculos/movimiento`, {
@@ -181,13 +273,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({
                     id_vehiculo: ID_VEHICULO,
                     id_comando: Number(idComando),
-                    origen: 'WEB'
+                    origen
                 })
             });
-            if (!resp.ok) {
+            if (resp.ok) {
+                cargarHistorialRDS();
+            } else {
                 registrarEvento(`Aviso API (${resp.status}) al ejecutar ${etiqueta}`);
             }
-        } catch (err) {
+        } catch (_) {
             registrarEvento(`Modo 3D local (sin conexión a EC2): ${etiqueta}`);
         }
     }
@@ -201,8 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
             zoneEl,
             knobEl,
             (idComando) => {
-                const mapEtiquetas = { 0: 'NEUTRAL', 11: 'AVANZAR', 12: 'RETROCEDER', 13: 'IZQUIERDA', 14: 'DERECHA' };
-                enviarComando(idComando, mapEtiquetas[idComando] || 'MOVIMIENTO');
+                enviarComando(idComando, NOMBRES_COMANDOS[idComando] || 'MOVIMIENTO', 'JOYSTICK');
             },
             (etiqueta) => {
                 if (directionBadge) directionBadge.textContent = etiqueta;
@@ -212,17 +305,12 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-    // Botones de actuadores y STOP
     document.querySelectorAll('.actuator-btn').forEach((btn) => {
-        btn.addEventListener('click', () => enviarComando(btn.dataset.cmd, btn.dataset.label));
+        btn.addEventListener('click', () => enviarComando(btn.dataset.cmd, btn.dataset.label, 'BOTON_WEB'));
     });
 
-    const btnStop = document.getElementById('btn-stop');
-    if (btnStop) {
-        btnStop.addEventListener('click', () => enviarComando(0, 'STOP EMERGENCIA'));
-    }
+    document.getElementById('btn-stop')?.addEventListener('click', () => enviarComando(0, 'DETENER (STOP)', 'STOP_WEB'));
 
-    // Ejecutar DEMO real en RDS + WebSocket
     const btnRunSeq = document.getElementById('btn-run-sequence');
     const seqSelect = document.getElementById('sequence-select');
     if (btnRunSeq && seqSelect) {
@@ -239,28 +327,157 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =========================================================
-    // 5. BARRA INFERIOR LIQUID GLASS + CAMBIO DE PESTAÑAS
+    // 6. PERMISOS REALES DE MICRÓFONO Y RECONOCIMIENTO DE VOZ IA
+    // =========================================================
+    const btnVoiceMic = document.getElementById('btn-voice-mic');
+    const micWrapper = document.getElementById('mic-orb-wrapper');
+    const voiceStatusLabel = document.getElementById('voice-status-label');
+    const voiceTranscriptText = document.getElementById('voice-transcript-text');
+    let recognition = null;
+    let isListening = false;
+
+    if (btnVoiceMic) {
+        btnVoiceMic.addEventListener('click', async () => {
+            if (isListening && recognition) {
+                recognition.stop();
+                return;
+            }
+
+            try {
+                // Fuerza la solicitud real de permiso de micrófono en PC y Celular
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach((track) => track.stop());
+
+                const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRec) {
+                    voiceStatusLabel.textContent = 'Permiso concedido • API de voz no soportada en este navegador';
+                    voiceTranscriptText.textContent = 'Tu micrófono tiene permiso, pero usa Chrome/Edge/Safari actualizado para transcribir.';
+                    return;
+                }
+
+                recognition = new SpeechRec();
+                recognition.lang = 'es-MX';
+                recognition.continuous = false;
+                recognition.interimResults = true;
+
+                recognition.onstart = () => {
+                    isListening = true;
+                    micWrapper?.classList.add('listening');
+                    voiceStatusLabel.textContent = 'Escuchando en vivo...';
+                    voiceTranscriptText.textContent = 'Habla ahora...';
+                };
+
+                recognition.onresult = (event) => {
+                    const texto = Array.from(event.results)
+                        .map((r) => r[0].transcript)
+                        .join('')
+                        .toLowerCase();
+                    voiceTranscriptText.textContent = `"${texto}"`;
+
+                    if (event.results[0].isFinal) {
+                        if (texto.includes('avanza') || texto.includes('adelante')) enviarComando(11, 'AVANZAR', 'VOZ_IA');
+                        else if (texto.includes('retrocede') || texto.includes('atrás')) enviarComando(12, 'RETROCEDER', 'VOZ_IA');
+                        else if (texto.includes('izquierda')) enviarComando(13, 'IZQUIERDA', 'VOZ_IA');
+                        else if (texto.includes('derecha')) enviarComando(14, 'DERECHA', 'VOZ_IA');
+                        else if (texto.includes('subir') || texto.includes('arriba')) enviarComando(15, 'SUBIR GARRA', 'VOZ_IA');
+                        else if (texto.includes('bajar') || texto.includes('abajo')) enviarComando(16, 'BAJAR GARRA', 'VOZ_IA');
+                        else if (texto.includes('detener') || texto.includes('alto') || texto.includes('stop')) enviarComando(0, 'DETENER (STOP)', 'VOZ_IA');
+                    }
+                };
+
+                recognition.onerror = (e) => {
+                    voiceStatusLabel.textContent = `Aviso de voz: ${e.error}`;
+                };
+
+                recognition.onend = () => {
+                    isListening = false;
+                    micWrapper?.classList.remove('listening');
+                    voiceStatusLabel.textContent = 'Micrófono listo • Toca para hablar de nuevo';
+                };
+
+                recognition.start();
+            } catch (err) {
+                voiceStatusLabel.textContent = 'Permiso de micrófono denegado o bloqueado';
+                voiceTranscriptText.textContent = 'Habilita el acceso al micrófono en los ajustes de tu navegador (HTTPS requerido).';
+            }
+        });
+    }
+
+    // =========================================================
+    // 7. PERMISOS REALES DE CÁMARA Y DETECCIÓN DE GESTOS
+    // =========================================================
+    const btnToggleCamera = document.getElementById('btn-toggle-camera');
+    const gestureVideo = document.getElementById('gesture-video');
+    const cameraPlaceholder = document.getElementById('camera-placeholder');
+    const gestureHud = document.getElementById('gesture-hud-overlay');
+    const gestureLabel = document.getElementById('gesture-detected-label');
+    let cameraStream = null;
+
+    if (btnToggleCamera && gestureVideo) {
+        btnToggleCamera.addEventListener('click', async () => {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach((t) => t.stop());
+                cameraStream = null;
+                gestureVideo.style.display = 'none';
+                if (gestureHud) gestureHud.style.display = 'none';
+                if (cameraPlaceholder) cameraPlaceholder.style.display = 'block';
+                btnToggleCamera.innerHTML = '<i class="bx bx-video"></i> <span>Activar Cámara</span>';
+                return;
+            }
+
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+                    audio: false
+                });
+                gestureVideo.srcObject = cameraStream;
+                await gestureVideo.play();
+
+                if (cameraPlaceholder) cameraPlaceholder.style.display = 'none';
+                gestureVideo.style.display = 'block';
+                if (gestureHud) gestureHud.style.display = 'flex';
+                if (gestureLabel) gestureLabel.textContent = 'CÁMARA ACTIVA • LISTO PARA GESTOS';
+                btnToggleCamera.innerHTML = '<i class="bx bx-video-off"></i> <span>Apagar Cámara</span>';
+            } catch (err) {
+                if (cameraPlaceholder) cameraPlaceholder.style.display = 'block';
+                const titleEl = document.getElementById('camera-placeholder-title');
+                const descEl = document.getElementById('camera-placeholder-desc');
+                if (titleEl) titleEl.textContent = 'Permiso de cámara denegado';
+                if (descEl) descEl.textContent = 'Autoriza el uso de la cámara en el candado de la barra de direcciones de tu navegador.';
+            }
+        });
+    }
+
+    // =========================================================
+    // 8. BARRA INFERIOR LIQUID GLASS SIN SOLAPAMIENTO NI SALTOS
     // =========================================================
     const dock = document.getElementById('liquid-dock');
     const dockItems = document.querySelectorAll('.dock-item');
     const lens = document.getElementById('liquid-lens');
     const views = document.querySelectorAll('.view');
+    let slideTimeout = null;
 
-    function moveLiquidLens(targetBtn) {
+    function moveLiquidLens(targetBtn, animate = true) {
         if (!dock || !lens || !targetBtn) return;
         const dockRect = dock.getBoundingClientRect();
         const btnRect = targetBtn.getBoundingClientRect();
         const offsetX = btnRect.left - dockRect.left;
 
+        if (animate) {
+            lens.classList.add('sliding');
+            clearTimeout(slideTimeout);
+            slideTimeout = setTimeout(() => lens.classList.remove('sliding'), 440);
+        }
+
         lens.style.width = `${btnRect.width}px`;
-        lens.style.transform = `translateX(${offsetX - 9}px)`;
+        lens.style.transform = `translateX(${offsetX}px)`;
     }
 
     const initialActive = document.querySelector('.dock-item.active');
-    if (initialActive) requestAnimationFrame(() => moveLiquidLens(initialActive));
+    if (initialActive) requestAnimationFrame(() => moveLiquidLens(initialActive, false));
     window.addEventListener('resize', () => {
         const current = document.querySelector('.dock-item.active');
-        if (current) moveLiquidLens(current);
+        if (current) moveLiquidLens(current, false);
     });
 
     dockItems.forEach((btn) => {
@@ -270,23 +487,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
             dockItems.forEach((item) => item.classList.remove('active'));
             btn.classList.add('active');
-            moveLiquidLens(btn);
+            moveLiquidLens(btn, true);
 
+            // Ocultar la vista anterior inmediatamente para evitar que la nueva aparezca abajo
             views.forEach((view) => {
                 if (view.id === targetId) {
-                    view.style.display = 'block';
-                    requestAnimationFrame(() => view.classList.add('active'));
+                    view.classList.add('active');
                 } else {
                     view.classList.remove('active');
-                    setTimeout(() => {
-                        if (!view.classList.contains('active')) view.style.display = 'none';
-                    }, 360);
                 }
             });
+
+            if (targetId === 'view-monitoring') {
+                cargarHistorialRDS();
+            }
         });
     });
 
-    // Botones de expansión y centrado 3D
     document.getElementById('btn-expand-3d')?.addEventListener('click', () => {
         document.querySelector('.dock-item[data-target="view-3d"]')?.click();
     });
@@ -294,7 +511,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-reset-3d-full')?.addEventListener('click', () => sim3D.reset());
 
     // =========================================================
-    // 6. MODO CLARO / OSCURO
+    // 9. MODO CLARO / OSCURO
     // =========================================================
     const themeToggle = document.getElementById('theme-toggle');
     const themeIcon = document.getElementById('theme-icon');
