@@ -19,8 +19,17 @@
     <!-- Encabezado principal -->
     <header class="glass-header">
         <div class="brand">
-            <div class="brand-icon">
-                <i class="bx bxs-tractor"></i>
+            <div class="brand-icon" aria-hidden="true">
+                <!-- SVG nítido de excavadora -->
+                <svg viewBox="0 0 64 64" width="28" height="28" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="8" y="44" width="34" height="10" rx="5" fill="currentColor" fill-opacity="0.2"/>
+                    <circle cx="14" cy="49" r="2" fill="currentColor"/>
+                    <circle cx="25" cy="49" r="2" fill="currentColor"/>
+                    <circle cx="36" cy="49" r="2" fill="currentColor"/>
+                    <path d="M12 44V31a3 3 0 0 1 3-3h14l5 8v8H12z" fill="currentColor" fill-opacity="0.15"/>
+                    <path d="M32 34l12-16 10 10-4 8"/>
+                    <path d="M47 36l8 2-2 7-7-2z" fill="currentColor"/>
+                </svg>
             </div>
             <div class="brand-text">
                 <h1>CONTROL EXCAVADORA IoT</h1>
@@ -79,7 +88,7 @@
     <main class="app-viewport">
 
         <!-- =========================================================
-             PESTAÑA 1: CONTROL PRINCIPAL + VISTA 3D EN TIEMPO REAL
+             PESTAÑA 1: CONTROL PRINCIPAL + SIMULACIÓN 3D EN VIVO
              ========================================================= -->
         <section id="view-control" class="view active">
             <div class="control-dashboard-grid">
@@ -91,33 +100,58 @@
                             <i class="bx bx-cube-alt text-blue"></i>
                             <h2>Simulación en Tiempo Real</h2>
                         </div>
-                        <button class="glass-icon-btn mini" id="btn-expand-3d" title="Pantalla completa 3D">
+                        <button class="glass-icon-btn mini" id="btn-expand-3d" title="Abrir vista 3D completa">
                             <i class="bx bx-fullscreen"></i>
                         </button>
                     </div>
 
                     <div class="viewport-3d-preview" id="preview-3d-container">
-                        <!-- Escenario visual 3D / Canvas -->
-                        <div class="excavator-stage">
+                        <div class="perspective-grid"></div>
+                        <div class="excavator-stage" id="excavator-stage">
                             <div class="radar-ring ring-1"></div>
                             <div class="radar-ring ring-2"></div>
-                            <div class="excavator-hologram" id="excavator-model-proxy">
-                                <i class="bx bxs-tractor"></i>
-                                <span class="model-tag">MODELO 3D LISTO</span>
+
+                            <!-- Modelo vectorial articulado que responde en tiempo real -->
+                            <div class="excavator-rig" id="excavator-rig">
+                                <svg viewBox="0 0 220 150" width="210" height="145" class="excavator-svg">
+                                    <!-- Sombra -->
+                                    <ellipse cx="95" cy="134" rx="68" ry="8" fill="rgba(0,0,0,0.45)"/>
+                                    <!-- Orugas -->
+                                    <rect x="34" y="108" width="96" height="22" rx="11" fill="#1e2430" stroke="#ffb703" stroke-width="2.5"/>
+                                    <circle cx="48" cy="119" r="5" fill="#ffb703"/>
+                                    <circle cx="82" cy="119" r="5" fill="#ffb703"/>
+                                    <circle cx="116" cy="119" r="5" fill="#ffb703"/>
+                                    <!-- Cabina -->
+                                    <g id="rig-cabin">
+                                        <path d="M42 106V68a6 6 0 0 1 6-6h36l16 20v24H42z" fill="#ffb703" stroke="#fff3c4" stroke-width="2"/>
+                                        <path d="M68 68h14l11 14H68V68z" fill="#0f172a" opacity="0.85"/>
+                                        <rect x="44" y="88" width="54" height="16" rx="3" fill="#d97706"/>
+                                    </g>
+                                    <!-- Brazo y Garra articulados -->
+                                    <g id="rig-arm" style="transform-origin: 96px 84px; transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);">
+                                        <path d="M96 84L142 36L176 66" fill="none" stroke="#ffb703" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M96 84L142 36L176 66" fill="none" stroke="#1e2430" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <circle cx="96" cy="84" r="6" fill="#fff"/>
+                                        <circle cx="142" cy="36" r="5" fill="#fff"/>
+                                        <!-- Pala / Garra -->
+                                        <path d="M170 64L194 70L186 92L166 84Z" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
+                                    </g>
+                                </svg>
+                                <span class="model-tag" id="sim-status-tag">GEMELO 3D ACTIVO</span>
                             </div>
                         </div>
 
                         <div class="hud-telemetry-overlay">
-                            <div class="hud-chip"><span>Base:</span> <strong id="hud-angle">0°</strong></div>
-                            <div class="hud-chip"><span>Brazo:</span> <strong id="hud-arm">0%</strong></div>
+                            <div class="hud-chip"><span>Giro Base:</span> <strong id="hud-angle">0°</strong></div>
+                            <div class="hud-chip"><span>Brazo:</span> <strong id="hud-arm">50%</strong></div>
                             <div class="hud-chip"><span>Estado:</span> <strong id="hud-state">NEUTRAL</strong></div>
                         </div>
                     </div>
 
                     <!-- Consola de eventos WebSocket en vivo -->
                     <div class="console-log-bar" id="ws-log-bar">
-                        <span class="log-message" id="last-log-text">WebSocket listo para transmitir comandos.</span>
-                        <span class="log-time" id="last-log-time">--:--:--</span>
+                        <span class="log-message" id="last-log-text">WebSocket conectado y listo para transmitir comandos.</span>
+                        <span class="log-time" id="last-log-time">00:00:00</span>
                     </div>
                 </div>
 
@@ -132,8 +166,198 @@
                     </div>
 
                     <div class="manual-body">
-                        <!-- Zona del Joystick + Botonera Lateral -->
                         <div class="joystick-and-actions">
+                            <!-- Joystick Virtual -->
                             <div class="joystick-pad-container">
                                 <div class="joystick-ring-outer" id="joystick-zone">
-                                    <div class="dir-arrow up"><i class="bx bx-chevron
+                                    <div class="dir-arrow up"><i class="bx bx-chevron-up"></i></div>
+                                    <div class="dir-arrow down"><i class="bx bx-chevron-down"></i></div>
+                                    <div class="dir-arrow left"><i class="bx bx-chevron-left"></i></div>
+                                    <div class="dir-arrow right"><i class="bx bx-chevron-right"></i></div>
+                                    <div class="joystick-knob" id="joystick-knob"></div>
+                                </div>
+                                <p class="helper-hint"><i class="bx bx-pointer"></i> Arrastra para mover • Suelta para detener</p>
+                            </div>
+
+                            <!-- Botonera de Actuadores -->
+                            <div class="actuators-grid">
+                                <button class="glass-btn actuator-btn" id="btn-garra-up" data-cmd="15" data-label="SUBIR GARRA">
+                                    <i class="bx bx-up-arrow-circle text-amber"></i>
+                                    <span>Subir Garra</span>
+                                </button>
+                                <button class="glass-btn actuator-btn" id="btn-garra-down" data-cmd="16" data-label="BAJAR GARRA">
+                                    <i class="bx bx-down-arrow-circle text-amber"></i>
+                                    <span>Bajar Garra</span>
+                                </button>
+                                <button class="glass-btn actuator-btn" id="btn-giro-izq" data-cmd="17" data-label="GIRO IZQ 90°">
+                                    <i class="bx bx-undo text-blue"></i>
+                                    <span>Giro Izq 90°</span>
+                                </button>
+                                <button class="glass-btn actuator-btn" id="btn-giro-der" data-cmd="18" data-label="GIRO DER 90°">
+                                    <i class="bx bx-redo text-blue"></i>
+                                    <span>Giro Der 90°</span>
+                                </button>
+                                <button class="glass-btn actuator-btn" id="btn-avanzar" data-cmd="11" data-label="AVANZAR">
+                                    <i class="bx bx-up-arrow-alt text-green"></i>
+                                    <span>Avanzar</span>
+                                </button>
+                                <button class="glass-btn actuator-btn" id="btn-retroceder" data-cmd="12" data-label="RETROCEDER">
+                                    <i class="bx bx-down-arrow-alt text-green"></i>
+                                    <span>Retroceder</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Secuencias Preprogramadas -->
+                        <div class="sequences-box">
+                            <label for="sequence-select"><i class="bx bx-play-circle text-amber"></i> Secuencias Preprogramadas (DEMO)</label>
+                            <div class="sequence-row">
+                                <select id="sequence-select" class="glass-select">
+                                    <option value="1">Demo Principal</option>
+                                    <option value="2">Ciclo de Excavación Completo</option>
+                                    <option value="3">Rotación de Reconocimiento 180°</option>
+                                </select>
+                                <button id="btn-run-sequence" class="glass-btn amber-solid">
+                                    <i class="bx bx-play"></i> Ejecutar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Botón de Paro de Emergencia -->
+                        <button id="btn-stop" class="glass-btn stop-emergency-btn">
+                            <i class="bx bxs-octagon"></i>
+                            <span>DETENER VEHÍCULO (STOP)</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- =========================================================
+             PESTAÑA 2: GEMELO DIGITAL 3D (PANTALLA COMPLETA)
+             ========================================================= -->
+        <section id="view-3d" class="view">
+            <div class="glass-card full-panel">
+                <div class="card-top-bar">
+                    <div class="card-title">
+                        <i class="bx bx-cube text-blue"></i>
+                        <h2>Gemelo Digital 3D • Telemetría Mecánica</h2>
+                    </div>
+                    <div class="hud-chip" style="max-width: 140px;"><span>Motor:</span> <strong>WebGL Ready</strong></div>
+                </div>
+                <div class="full-3d-stage" id="full-3d-canvas-container">
+                    <div class="perspective-grid"></div>
+                    <div class="excavator-stage">
+                        <div class="radar-ring ring-1"></div>
+                        <div class="radar-ring ring-2"></div>
+                        <div class="excavator-rig">
+                            <i class="bx bx-cube-alt" style="font-size: 4.5rem; color: var(--amber);"></i>
+                            <span class="model-tag">VISTA 3D EXPANDIDA LISTA PARA THREE.JS</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             PESTAÑA 3: CONTROL POR VOZ IA
+             ========================================================= -->
+        <section id="view-voice" class="view">
+            <div class="glass-card full-panel center-stage">
+                <div class="ai-badge"><i class="bx bx-sparkles"></i> ASISTENTE NEURAL DE VOZ</div>
+                <h2>Control por Comandos de Voz</h2>
+                <p class="muted-desc">Pulsa el micrófono y dicta una orden: <em>"Avanzar"</em>, <em>"Subir garra"</em>, <em>"Giro izquierda"</em> o <em>"Detener"</em>.</p>
+
+                <div class="mic-orb-wrapper" id="mic-orb-wrapper">
+                    <div class="mic-wave wave-1"></div>
+                    <div class="mic-wave wave-2"></div>
+                    <button id="btn-voice-mic" class="mic-trigger-btn" aria-label="Activar micrófono">
+                        <i class="bx bxs-microphone"></i>
+                    </button>
+                </div>
+
+                <div class="transcript-box" id="voice-transcript-box">
+                    <span class="transcript-label">Transcripción en vivo:</span>
+                    <p id="voice-transcript-text">En espera de activación...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             PESTAÑA 4: CONTROL POR GESTOS (VISIÓN ARTIFICIAL)
+             ========================================================= -->
+        <section id="view-gestures" class="view">
+            <div class="glass-card full-panel">
+                <div class="card-top-bar">
+                    <div class="card-title">
+                        <i class="bx bx-hand text-amber"></i>
+                        <h2>Control Espacial por Gestos (Cámara)</h2>
+                    </div>
+                    <button id="btn-toggle-camera" class="glass-btn amber-solid">
+                        <i class="bx bx-video"></i> Activar Cámara
+                    </button>
+                </div>
+
+                <div class="camera-viewport" id="gesture-camera-container">
+                    <video id="gesture-video" autoplay playsinline muted style="display: none; width: 100%; max-height: 360px; border-radius: 14px;"></video>
+                    <canvas id="gesture-canvas" style="display: none;"></canvas>
+                    <div class="camera-placeholder" id="camera-placeholder">
+                        <i class="bx bx-camera-off"></i>
+                        <h3>Cámara Desactivada</h3>
+                        <p>Activa la cámara de tu computadora o celular para controlar la excavadora con movimientos de mano.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- =========================================================
+         PIE DE PÁGINA
+         ========================================================= -->
+    <footer class="app-footer">
+        <p>Desarrollado por <strong>Uriel Durán Peralta</strong> • 2026</p>
+    </footer>
+
+    <!-- =========================================================
+         BARRA DE NAVEGACIÓN INFERIOR (iOS / WHATSAPP LIQUID GLASS)
+         ========================================================= -->
+    <nav class="liquid-dock-wrapper" aria-label="Navegación principal">
+        <div class="liquid-dock" id="liquid-dock">
+            <div class="glass-specular-top"></div>
+            <div class="glass-specular-bottom"></div>
+            <div class="liquid-active-pill" id="liquid-active-pill"></div>
+
+            <button class="dock-item active" data-target="view-control">
+                <div class="dock-icon"><i class="bx bxs-joystick"></i></div>
+                <span>Control</span>
+            </button>
+
+            <button class="dock-item" data-target="view-3d">
+                <div class="dock-icon"><i class="bx bx-cube-alt"></i></div>
+                <span>3D View</span>
+            </button>
+
+            <button class="dock-item" data-target="view-voice">
+                <div class="dock-icon">
+                    <i class="bx bxs-microphone"></i>
+                    <span class="dock-badge">IA</span>
+                </div>
+                <span>Voz IA</span>
+            </button>
+
+            <button class="dock-item" data-target="view-gestures">
+                <div class="dock-icon">
+                    <i class="bx bxs-hand"></i>
+                    <span class="dock-badge blue">CAM</span>
+                </div>
+                <span>Gestos</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Carga modular del controlador principal -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

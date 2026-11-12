@@ -5,21 +5,19 @@
    ========================================================= */
 :root[data-theme="dark"] {
     --bg-canvas: #08090d;
-    --bg-card: rgba(20, 23, 31, 0.68);
-    --bg-card-solid: #14171f;
-    --bg-subpanel: rgba(11, 13, 18, 0.65);
+    --bg-card: rgba(20, 23, 31, 0.72);
+    --bg-subpanel: rgba(11, 13, 18, 0.72);
     --border-glass: rgba(255, 255, 255, 0.09);
-    --border-highlight: rgba(255, 255, 255, 0.22);
     --text-primary: #f4f6fb;
     --text-secondary: #8e96aa;
     --shadow-card: 0 14px 36px rgba(0, 0, 0, 0.48);
 
     /* Liquid Glass Dock Oscuro */
-    --dock-bg: rgba(34, 37, 46, 0.52);
-    --dock-border: rgba(255, 255, 255, 0.22);
-    --dock-pill-bg: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.07) 65%, rgba(255, 183, 3, 0.14));
-    --dock-pill-border: rgba(255, 255, 255, 0.38);
-    --dock-shadow: 0 22px 48px rgba(0, 0, 0, 0.72), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+    --dock-bg: rgba(34, 37, 46, 0.56);
+    --dock-border: rgba(255, 255, 255, 0.24);
+    --dock-pill-bg: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.08) 65%, rgba(255, 183, 3, 0.16));
+    --dock-pill-border: rgba(255, 255, 255, 0.42);
+    --dock-shadow: 0 22px 48px rgba(0, 0, 0, 0.75), inset 0 1px 1px rgba(255, 255, 255, 0.35);
 
     /* Acentos */
     --amber: #ffb703;
@@ -29,26 +27,23 @@
     --green-soft: rgba(16, 185, 129, 0.16);
     --blue: #3b82f6;
     --blue-soft: rgba(59, 130, 246, 0.16);
-    --red: #ef4444;
     --red-gradient: linear-gradient(135deg, #dc2626, #b91c1c);
 }
 
 :root[data-theme="light"] {
     --bg-canvas: #eef1f6;
-    --bg-card: rgba(255, 255, 255, 0.78);
-    --bg-card-solid: #ffffff;
-    --bg-subpanel: rgba(241, 245, 249, 0.85);
+    --bg-card: rgba(255, 255, 255, 0.82);
+    --bg-subpanel: rgba(241, 245, 249, 0.9);
     --border-glass: rgba(15, 23, 42, 0.09);
-    --border-highlight: rgba(255, 255, 255, 0.9);
     --text-primary: #0f172a;
     --text-secondary: #475569;
     --shadow-card: 0 12px 30px rgba(15, 23, 42, 0.08);
 
     /* Liquid Glass Dock Claro */
-    --dock-bg: rgba(255, 255, 255, 0.58);
-    --dock-border: rgba(255, 255, 255, 0.85);
-    --dock-pill-bg: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.95), rgba(241, 245, 249, 0.55) 70%, rgba(255, 183, 3, 0.18));
-    --dock-pill-border: rgba(255, 255, 255, 0.95);
+    --dock-bg: rgba(255, 255, 255, 0.62);
+    --dock-border: rgba(255, 255, 255, 0.9);
+    --dock-pill-bg: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.96), rgba(241, 245, 249, 0.6) 70%, rgba(255, 183, 3, 0.2));
+    --dock-pill-border: rgba(255, 255, 255, 1);
     --dock-shadow: 0 18px 40px rgba(15, 23, 42, 0.16), inset 0 1px 2px rgba(255, 255, 255, 1);
 
     /* Acentos */
@@ -59,7 +54,6 @@
     --green-soft: rgba(5, 150, 105, 0.14);
     --blue: #2563eb;
     --blue-soft: rgba(37, 99, 235, 0.14);
-    --red: #dc2626;
     --red-gradient: linear-gradient(135deg, #ef4444, #dc2626);
 }
 
@@ -80,7 +74,7 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     transition: background-color 0.35s ease, color 0.35s ease;
-    padding-bottom: 115px; /* Espacio para que el dock nunca tape contenido */
+    padding-bottom: 115px;
 }
 
 .text-amber { color: var(--amber); }
@@ -114,31 +108,9 @@ body {
     animation: orbDrift 18s ease-in-out infinite alternate;
 }
 
-.orb-1 {
-    width: 360px;
-    height: 360px;
-    background: var(--amber-glow);
-    top: -110px;
-    left: -80px;
-}
-
-.orb-2 {
-    width: 420px;
-    height: 420px;
-    background: var(--blue-soft);
-    bottom: -120px;
-    right: -90px;
-    animation-delay: -6s;
-}
-
-.orb-3 {
-    width: 280px;
-    height: 280px;
-    background: var(--green-soft);
-    top: 42%;
-    left: 48%;
-    animation-delay: -11s;
-}
+.orb-1 { width: 360px; height: 360px; background: var(--amber-glow); top: -110px; left: -80px; }
+.orb-2 { width: 420px; height: 420px; background: var(--blue-soft); bottom: -120px; right: -90px; animation-delay: -6s; }
+.orb-3 { width: 280px; height: 280px; background: var(--green-soft); top: 42%; left: 48%; animation-delay: -11s; }
 
 @keyframes orbDrift {
     0% { transform: translate(0, 0) scale(1); }
@@ -166,11 +138,7 @@ body {
     gap: 12px;
 }
 
-.brand {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
+.brand { display: flex; align-items: center; gap: 14px; }
 
 .brand-icon {
     width: 46px;
@@ -181,27 +149,12 @@ body {
     color: var(--amber);
     display: grid;
     place-items: center;
-    font-size: 1.65rem;
+    flex-shrink: 0;
 }
 
-.brand-text h1 {
-    font-size: 1.05rem;
-    font-weight: 800;
-    letter-spacing: 0.4px;
-    color: var(--amber);
-}
-
-.brand-text p {
-    font-size: 0.78rem;
-    color: var(--text-secondary);
-    margin-top: 2px;
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
+.brand-text h1 { font-size: 1.05rem; font-weight: 800; letter-spacing: 0.4px; color: var(--amber); }
+.brand-text p { font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px; }
+.header-actions { display: flex; align-items: center; gap: 12px; }
 
 .connection-badge {
     display: flex;
@@ -241,20 +194,11 @@ body {
     display: grid;
     place-items: center;
     cursor: pointer;
-    transition: transform 0.2s ease, background 0.2s ease;
+    transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.glass-icon-btn:hover {
-    transform: translateY(-2px);
-    border-color: var(--amber);
-}
-
-.glass-icon-btn.mini {
-    width: 34px;
-    height: 34px;
-    font-size: 1rem;
-    color: var(--text-secondary);
-}
+.glass-icon-btn:hover { transform: translateY(-2px); border-color: var(--amber); }
+.glass-icon-btn.mini { width: 34px; height: 34px; font-size: 1rem; color: var(--text-secondary); }
 
 /* =========================================================
    TARJETAS DE TELEMETRÍA (WSS, API, RDS)
@@ -269,12 +213,8 @@ body {
 }
 
 @media (max-width: 768px) {
-    .telemetry-bar {
-        grid-template-columns: 1fr;
-    }
-    .connection-badge {
-        display: none;
-    }
+    .telemetry-bar { grid-template-columns: 1fr; }
+    .connection-badge { display: none; }
 }
 
 .glass-card {
@@ -287,9 +227,7 @@ body {
     transition: background-color 0.35s ease, border-color 0.35s ease;
 }
 
-.status-card {
-    padding: 12px 16px;
-}
+.status-card { padding: 12px 16px; }
 
 .status-card-header {
     display: flex;
@@ -334,11 +272,7 @@ body {
     transition: opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1), transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.view.active {
-    display: block;
-    opacity: 1;
-    transform: translateY(0) scale(1);
-}
+.view.active { display: block; opacity: 1; transform: translateY(0) scale(1); }
 
 /* =========================================================
    GRID PRINCIPAL (SIMULACIÓN 3D + CONTROL MANUAL)
@@ -351,16 +285,10 @@ body {
 }
 
 @media (max-width: 980px) {
-    .control-dashboard-grid {
-        grid-template-columns: 1fr;
-    }
+    .control-dashboard-grid { grid-template-columns: 1fr; }
 }
 
-.sim-card, .manual-card {
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
+.sim-card, .manual-card { overflow: hidden; display: flex; flex-direction: column; }
 
 .card-top-bar {
     padding: 16px 20px;
@@ -370,25 +298,10 @@ body {
     align-items: center;
 }
 
-.card-top-bar.highlight-amber {
-    background: linear-gradient(90deg, var(--amber-soft), transparent 85%);
-}
-
-.card-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.card-title i {
-    font-size: 1.35rem;
-    color: var(--amber);
-}
-
-.card-title h2 {
-    font-size: 1rem;
-    font-weight: 700;
-}
+.card-top-bar.highlight-amber { background: linear-gradient(90deg, var(--amber-soft), transparent 85%); }
+.card-title { display: flex; align-items: center; gap: 10px; }
+.card-title i { font-size: 1.35rem; color: var(--amber); }
+.card-title h2 { font-size: 1rem; font-weight: 700; }
 
 .direction-badge {
     font-family: 'JetBrains Mono', monospace;
@@ -398,13 +311,13 @@ body {
     border-radius: 8px;
     background: var(--bg-subpanel);
     border: 1px solid var(--border-glass);
-    color: var(--text-secondary);
+    color: var(--amber);
 }
 
 /* Vista Previa 3D */
 .viewport-3d-preview {
     flex: 1;
-    min-height: 290px;
+    min-height: 295px;
     position: relative;
     background: radial-gradient(circle at center, rgba(59, 130, 246, 0.08), var(--bg-subpanel) 75%);
     display: flex;
@@ -413,10 +326,22 @@ body {
     overflow: hidden;
 }
 
+.perspective-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 32px 32px;
+    transform: perspective(360px) rotateX(48deg) scale(1.4);
+    transform-origin: center 75%;
+    pointer-events: none;
+}
+
 .excavator-stage {
     position: relative;
-    width: 210px;
-    height: 210px;
+    width: 240px;
+    height: 220px;
     display: grid;
     place-items: center;
 }
@@ -428,27 +353,21 @@ body {
     animation: spinSlow 24s linear infinite;
 }
 
-.ring-1 { width: 190px; height: 190px; }
-.ring-2 { width: 135px; height: 135px; border-style: solid; border-color: rgba(59, 130, 246, 0.22); animation-direction: reverse; }
+.ring-1 { width: 205px; height: 205px; }
+.ring-2 { width: 145px; height: 145px; border-style: solid; border-color: rgba(59, 130, 246, 0.22); animation-direction: reverse; }
 
-@keyframes spinSlow {
-    100% { transform: rotate(360deg); }
-}
+@keyframes spinSlow { 100% { transform: rotate(360deg); } }
 
-.excavator-hologram {
+.excavator-rig {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     z-index: 2;
-    transition: transform 0.3s ease;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.excavator-hologram i {
-    font-size: 4.5rem;
-    color: var(--amber);
-    filter: drop-shadow(0 0 18px var(--amber-glow));
-}
+.excavator-svg { filter: drop-shadow(0 8px 18px rgba(255, 183, 3, 0.25)); }
 
 .model-tag {
     font-family: 'JetBrains Mono', monospace;
@@ -482,10 +401,7 @@ body {
     color: var(--text-secondary);
 }
 
-.hud-chip strong {
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--text-primary);
-}
+.hud-chip strong { font-family: 'JetBrains Mono', monospace; color: var(--text-primary); }
 
 .console-log-bar {
     padding: 11px 18px;
@@ -494,20 +410,16 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.76rem;
     color: var(--amber);
 }
 
 /* =========================================================
-   CONTROLES MANUALES Y JOYSTICK
+   CONTROLES MANUALES Y JOYSTICK (CENTRADO PARA JOYSTICK.JS)
    ========================================================= */
-.manual-body {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
+.manual-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
 
 .joystick-and-actions {
     display: grid;
@@ -517,17 +429,10 @@ body {
 }
 
 @media (max-width: 600px) {
-    .joystick-and-actions {
-        grid-template-columns: 1fr;
-    }
+    .joystick-and-actions { grid-template-columns: 1fr; }
 }
 
-.joystick-pad-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
+.joystick-pad-container { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 
 .joystick-ring-outer {
     width: 175px;
@@ -537,8 +442,6 @@ body {
     border: 2px solid var(--amber);
     box-shadow: 0 0 28px var(--amber-soft), inset 0 0 20px rgba(0, 0, 0, 0.45);
     position: relative;
-    display: grid;
-    place-items: center;
     touch-action: none;
     user-select: none;
 }
@@ -551,38 +454,30 @@ body {
     pointer-events: none;
 }
 
-.dir-arrow.up { top: 10px; }
-.dir-arrow.down { bottom: 10px; }
-.dir-arrow.left { left: 10px; }
-.dir-arrow.right { right: 10px; }
+.dir-arrow.up { top: 10px; left: 50%; transform: translateX(-50%); }
+.dir-arrow.down { bottom: 10px; left: 50%; transform: translateX(-50%); }
+.dir-arrow.left { left: 10px; top: 50%; transform: translateY(-50%); }
+.dir-arrow.right { right: 10px; top: 50%; transform: translateY(-50%); }
 
+/* Posición absoluta 50%/50% requerida por joystick.js */
 .joystick-knob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 58px;
     height: 58px;
     border-radius: 50%;
     background: radial-gradient(circle at 35% 30%, #ffe169, #ffb703 65%, #b45309 100%);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 0 18px var(--amber-glow);
     cursor: grab;
-    position: relative;
     z-index: 3;
-    transition: transform 0.08s ease-out;
 }
 
-.joystick-knob:active {
-    cursor: grabbing;
-}
+.joystick-knob:active { cursor: grabbing; }
+.helper-hint { font-size: 0.72rem; color: var(--text-secondary); text-align: center; }
 
-.helper-hint {
-    font-size: 0.72rem;
-    color: var(--text-secondary);
-    text-align: center;
-}
-
-.actuators-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
+.actuators-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
 .glass-btn {
     padding: 12px 14px;
@@ -600,21 +495,9 @@ body {
     transition: transform 0.14s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
-.glass-btn:hover {
-    border-color: var(--amber);
-    transform: translateY(-1px);
-}
-
-.glass-btn:active {
-    transform: scale(0.96);
-}
-
-.glass-btn.amber-solid {
-    background: var(--amber);
-    color: #0b0d12;
-    border: none;
-    font-weight: 700;
-}
+.glass-btn:hover { border-color: var(--amber); transform: translateY(-1px); }
+.glass-btn:active { transform: scale(0.96); }
+.glass-btn.amber-solid { background: var(--amber); color: #0b0d12; border: none; font-weight: 700; }
 
 .sequences-box {
     padding: 14px;
@@ -633,10 +516,7 @@ body {
     margin-bottom: 10px;
 }
 
-.sequence-row {
-    display: flex;
-    gap: 10px;
-}
+.sequence-row { display: flex; gap: 10px; }
 
 .glass-select {
     flex: 1;
@@ -662,35 +542,24 @@ body {
     box-shadow: 0 10px 25px rgba(220, 38, 38, 0.35);
 }
 
-.stop-emergency-btn:hover {
-    border-color: #ffffff;
-    filter: brightness(1.06);
-}
+.stop-emergency-btn:hover { border-color: #ffffff; filter: brightness(1.06); }
 
 /* =========================================================
    VISTAS SECUNDARIAS (3D FULL, VOZ IA, GESTOS)
    ========================================================= */
-.full-panel {
-    min-height: 460px;
-    display: flex;
-    flex-direction: column;
-}
+.full-panel { min-height: 460px; display: flex; flex-direction: column; }
 
 .full-3d-stage {
     flex: 1;
     min-height: 380px;
+    position: relative;
     display: grid;
     place-items: center;
     background: radial-gradient(circle, rgba(59, 130, 246, 0.1), var(--bg-subpanel));
+    overflow: hidden;
 }
 
-.center-stage {
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 40px 24px;
-    gap: 16px;
-}
+.center-stage { align-items: center; justify-content: center; text-align: center; padding: 40px 24px; gap: 16px; }
 
 .ai-badge {
     padding: 6px 14px;
@@ -703,21 +572,8 @@ body {
     letter-spacing: 0.8px;
 }
 
-.muted-desc {
-    max-width: 480px;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    line-height: 1.5;
-}
-
-.mic-orb-wrapper {
-    position: relative;
-    width: 130px;
-    height: 130px;
-    display: grid;
-    place-items: center;
-    margin: 14px 0;
-}
+.muted-desc { max-width: 480px; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; }
+.mic-orb-wrapper { position: relative; width: 130px; height: 130px; display: grid; place-items: center; margin: 14px 0; }
 
 .mic-trigger-btn {
     width: 84px;
@@ -736,15 +592,7 @@ body {
 }
 
 .mic-trigger-btn:hover { transform: scale(1.06); }
-
-.mic-wave {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    border: 2px solid var(--amber);
-    opacity: 0;
-}
-
+.mic-wave { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--amber); opacity: 0; }
 .mic-orb-wrapper.listening .wave-1 { animation: rippleWave 1.8s infinite; }
 .mic-orb-wrapper.listening .wave-2 { animation: rippleWave 1.8s 0.6s infinite; }
 
@@ -762,18 +610,8 @@ body {
     border: 1px solid var(--border-glass);
 }
 
-.transcript-label {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.7px;
-    color: var(--text-secondary);
-}
-
-.transcript-box p {
-    margin-top: 6px;
-    font-size: 0.95rem;
-    font-weight: 600;
-}
+.transcript-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text-secondary); }
+.transcript-box p { margin-top: 6px; font-size: 0.95rem; font-weight: 600; }
 
 .camera-viewport {
     flex: 1;
@@ -788,23 +626,24 @@ body {
     position: relative;
 }
 
-.camera-placeholder {
+.camera-placeholder { text-align: center; padding: 24px; max-width: 380px; }
+.camera-placeholder i { font-size: 3.2rem; color: var(--text-secondary); margin-bottom: 10px; }
+.camera-placeholder p { font-size: 0.84rem; color: var(--text-secondary); margin-top: 6px; }
+
+/* =========================================================
+   PIE DE PÁGINA
+   ========================================================= */
+.app-footer {
+    max-width: 1320px;
+    width: calc(100% - 32px);
+    margin: 24px auto 0;
+    padding: 14px;
     text-align: center;
-    padding: 24px;
-    max-width: 380px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
 }
 
-.camera-placeholder i {
-    font-size: 3.2rem;
-    color: var(--text-secondary);
-    margin-bottom: 10px;
-}
-
-.camera-placeholder p {
-    font-size: 0.84rem;
-    color: var(--text-secondary);
-    margin-top: 6px;
-}
+.app-footer strong { color: var(--amber); font-weight: 600; }
 
 /* =========================================================
    BARRA INFERIOR LIQUID GLASS (ESTILO iOS / WHATSAPP)
@@ -837,7 +676,6 @@ body {
     overflow: hidden;
 }
 
-/* Brillo especular superior e inferior tipo vidrio grueso */
 .glass-specular-top {
     position: absolute;
     top: 0;
@@ -858,7 +696,6 @@ body {
     pointer-events: none;
 }
 
-/* Burbuja líquida deslizante con refracción cromática */
 .liquid-active-pill {
     position: absolute;
     top: 7px;
@@ -894,9 +731,7 @@ body {
     transition: color 0.25s ease, transform 0.25s ease;
 }
 
-.dock-item:active {
-    transform: scale(0.92);
-}
+.dock-item:active { transform: scale(0.92); }
 
 .dock-icon {
     position: relative;
@@ -905,11 +740,7 @@ body {
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.dock-item span {
-    font-size: 0.68rem;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-}
+.dock-item span { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.2px; }
 
 .dock-badge {
     position: absolute;
@@ -930,9 +761,7 @@ body {
     box-shadow: 0 2px 6px rgba(59, 130, 246, 0.5);
 }
 
-.dock-item.active {
-    color: var(--text-primary);
-}
+.dock-item.active { color: var(--text-primary); }
 
 .dock-item.active .dock-icon {
     color: var(--amber);
