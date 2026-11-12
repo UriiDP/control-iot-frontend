@@ -183,23 +183,23 @@
                                 <p class="helper-hint"><i class="bx bx-pointer"></i> Arrastra para mover • Suelta para detener</p>
                             </div>
 
-                            <!-- Botonera de Actuadores -->
+                            <!-- Botonera de Actuadores (Mapeada exactamente a RDS IDs 11-21) -->
                             <div class="actuators-grid">
-                                <button class="glass-btn actuator-btn" id="btn-garra-up" data-cmd="15" data-label="SUBIR GARRA">
+                                <button class="glass-btn actuator-btn" id="btn-garra-up" data-cmd="17" data-label="ELEVAR GARRA">
                                     <i class="bx bx-up-arrow-circle text-amber"></i>
-                                    <span>Subir Garra</span>
+                                    <span>Elevar Garra</span>
                                 </button>
-                                <button class="glass-btn actuator-btn" id="btn-garra-down" data-cmd="16" data-label="BAJAR GARRA">
+                                <button class="glass-btn actuator-btn" id="btn-garra-down" data-cmd="18" data-label="BAJAR GARRA">
                                     <i class="bx bx-down-arrow-circle text-amber"></i>
                                     <span>Bajar Garra</span>
                                 </button>
-                                <button class="glass-btn actuator-btn" id="btn-giro-izq" data-cmd="17" data-label="GIRO IZQ 90°">
+                                <button class="glass-btn actuator-btn" id="btn-giro-izq" data-cmd="15" data-label="GIRA CABINA IZQ">
                                     <i class="bx bx-undo text-blue"></i>
-                                    <span>Giro Izq 90°</span>
+                                    <span>Cabina Izq 90°</span>
                                 </button>
-                                <button class="glass-btn actuator-btn" id="btn-giro-der" data-cmd="18" data-label="GIRO DER 90°">
+                                <button class="glass-btn actuator-btn" id="btn-giro-der" data-cmd="16" data-label="GIRA CABINA DER">
                                     <i class="bx bx-redo text-blue"></i>
-                                    <span>Giro Der 90°</span>
+                                    <span>Cabina Der 90°</span>
                                 </button>
                                 <button class="glass-btn actuator-btn" id="btn-avanzar" data-cmd="11" data-label="AVANZAR">
                                     <i class="bx bx-up-arrow-alt text-green"></i>
@@ -208,6 +208,14 @@
                                 <button class="glass-btn actuator-btn" id="btn-retroceder" data-cmd="12" data-label="RETROCEDER">
                                     <i class="bx bx-down-arrow-alt text-green"></i>
                                     <span>Retroceder</span>
+                                </button>
+                                <button class="glass-btn actuator-btn" id="btn-velocidad" data-cmd="19" data-label="VELOCIDAD">
+                                    <i class="bx bx-tachometer text-amber"></i>
+                                    <span>Velocidad</span>
+                                </button>
+                                <button class="glass-btn actuator-btn" id="btn-sonido" data-cmd="21" data-label="SONIDO">
+                                    <i class="bx bx-volume-full text-blue"></i>
+                                    <span>Sonido</span>
                                 </button>
                             </div>
                         </div>
@@ -226,10 +234,10 @@
                             </div>
                         </div>
 
-                        <!-- Botón de Paro de Emergencia -->
+                        <!-- Botón de Paro / Encendido (ID 20: Enc/Apag en RDS) -->
                         <button id="btn-stop" class="glass-btn stop-emergency-btn">
                             <i class="bx bxs-octagon"></i>
-                            <span>DETENER VEHÍCULO (STOP)</span>
+                            <span>DETENER / ENC-APAG (STOP)</span>
                         </button>
                     </div>
                 </div>
@@ -270,7 +278,7 @@
                                 <strong id="mon-vehiculo">ID #1</strong>
                             </div>
                             <div class="meta-box">
-                                <span>CÓDIGO</span>
+                                <span>ID COMANDO</span>
                                 <strong id="mon-codigo">—</strong>
                             </div>
                             <div class="meta-box">
@@ -363,7 +371,7 @@
             <div class="glass-card full-panel center-stage">
                 <div class="ai-badge"><i class="bx bx-sparkles"></i> ASISTENTE NEURAL DE VOZ</div>
                 <h2>Control por Comandos de Voz</h2>
-                <p class="muted-desc">Pulsa el micrófono para otorgar permiso y dicta una orden: <em>"Avanzar"</em>, <em>"Retroceder"</em>, <em>"Subir garra"</em>, <em>"Bajar garra"</em>, <em>"Izquierda"</em>, <em>"Derecha"</em> o <em>"Detener"</em>.</p>
+                <p class="muted-desc">Pulsa el micrófono para otorgar permiso y dicta una orden: <em>"Avanzar"</em>, <em>"Retroceder"</em>, <em>"Cabina izquierda"</em>, <em>"Cabina derecha"</em>, <em>"Subir garra"</em>, <em>"Bajar garra"</em>, <em>"Velocidad"</em>, <em>"Sonido"</em> o <em>"Detener"</em>.</p>
 
                 <div class="mic-orb-wrapper" id="mic-orb-wrapper">
                     <div class="mic-wave wave-1"></div>

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Motor 3D Interactivo (Three.js) - Giro Independiente de Cabina en Obra
+   Motor 3D Interactivo (Three.js) - Sincronizado con IDs RDS 11 al 21
    ========================================================================== */
 
 export class Excavator3DManager {
@@ -10,12 +10,13 @@ export class Excavator3DManager {
         this.state = {
             posX: 0,
             posZ: 0,
-            chassisYawRad: 0,      // Dirección de las orugas al avanzar/retroceder
-            cabinYawRad: 0,        // Ángulo actual de rotación de la cabina superior
-            targetCabinYawRad: 0,  // Ángulo objetivo de la cabina superior
-            cabinAngularSpeed: 0,  // Velocidad continua al girar izquierda/derecha
-            armElevation: 0.5,
-            linearSpeed: 0,
+            chassisYawRad: 0,       // Orientación de las orugas
+            chassisAngularSpeed: 0, // Giro continuo del chasis (IDs 13 y 14)
+            cabinYawRad: 0,         // Ángulo actual de la cabina superior
+            targetCabinYawRad: 0,   // Ángulo objetivo de la cabina (IDs 15 y 16)
+            armElevation: 0.5,      // Elevación de la garra (IDs 17 y 18)
+            linearSpeed: 0,         // Avance/retroceso (IDs 11 y 12)
+            speedMultiplier: 1.0,   // Multiplicador de velocidad (ID 19)
             cameraOrbitYaw: 0.72,
             cameraOrbitPitch: 0.44
         };
@@ -88,7 +89,7 @@ export class Excavator3DManager {
         this.buildConstructionSite(scene, THREE);
 
         // =========================================================
-        // EXCAVADORA 3D (CHASSIS FIJO + CABINA SUPERIOR GIRATORIA)
+        // EXCAVADORA 3D (CHASSIS + CABINA SUPERIOR GIRATORIA)
         // =========================================================
         const rootGroup = new THREE.Group();
         scene.add(rootGroup);
@@ -112,12 +113,12 @@ export class Excavator3DManager {
         axle.position.set(0, 0.24, 0);
         rootGroup.add(axle);
 
-        // Corona giratoria central (anillo entre orugas y cabina)
+        // Corona giratoria central
         const turretRing = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.48, 0.12, 24), matSteel);
         turretRing.position.set(0, 0.38, 0);
         rootGroup.add(turretRing);
 
-        // 2. Cabina superior y torreta (esta parte gira independientemente)
+        // 2. Cabina superior y torreta (gira independientemente sobre las orugas)
         const upperBody = new THREE.Group();
         upperBody.position.set(0, 0.44, 0);
         rootGroup.add(upperBody);
@@ -138,7 +139,7 @@ export class Excavator3DManager {
         cabinRoof.position.set(0.18, 1.08, -0.26);
         upperBody.add(cabinRoof);
 
-        // 3. Brazo y Pala acoplados a la cabina giratoria
+        // 3. Brazo y Garra acoplados a la cabina giratoria
         const boomPivot = new THREE.Group();
         boomPivot.position.set(0.45, 0.42, 0.24);
         upperBody.add(boomPivot);
@@ -177,7 +178,6 @@ export class Excavator3DManager {
     }
 
     buildConstructionSite(scene, THREE) {
-        // Montículos de arena
         const sandMat = new THREE.MeshStandardMaterial({ color: 0xe6ccb2, roughness: 0.95 });
         [
             { x: -4.2, z: -3.2, r: 1.5, h: 1.05 },
@@ -189,7 +189,6 @@ export class Excavator3DManager {
             scene.add(mesh);
         });
 
-        // Tubos sueltos de drenaje apilados
         const pipeMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.4, roughness: 0.45 });
         [
             { x: -3.2, y: 0.22, z: 1.6 },
@@ -202,7 +201,6 @@ export class Excavator3DManager {
             scene.add(pipe);
         });
 
-        // Conos viales naranjas con franja blanca
         const coneMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.5 });
         const stripeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
         [[2.6, 2.5], [3.4, 2.1], [2.2, 3.3], [-2.5, -2.6]].forEach(([cx, cz]) => {
@@ -216,7 +214,6 @@ export class Excavator3DManager {
             scene.add(group);
         });
 
-        // Edificio en construcción
         const bldgMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.7 });
         const winMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.2 });
         const building = new THREE.Mesh(new THREE.BoxGeometry(3.6, 6.2, 3.0), bldgMat);
@@ -231,7 +228,6 @@ export class Excavator3DManager {
             }
         }
 
-        // Grúa torre amarilla
         const craneMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.3, roughness: 0.4 });
         const mast = new THREE.Mesh(new THREE.BoxGeometry(0.38, 8.8, 0.38), craneMat);
         mast.position.set(-4.8, 4.4, -7.5);
@@ -241,7 +237,6 @@ export class Excavator3DManager {
         jib.position.set(-3.2, 8.6, -7.5);
         scene.add(jib);
 
-        // Nubes
         const cloudMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95 });
         [[-6, 9.5, -10], [5, 10.2, -11], [9, 9.0, -4]].forEach(([x, y, z]) => {
             const cGroup = new THREE.Group();
@@ -297,38 +292,66 @@ export class Excavator3DManager {
         });
     }
 
-    aplicarComando(etiqueta) {
-        if (etiqueta === 'AVANZAR') {
-            this.state.linearSpeed = 0.036;
-            this.state.cabinAngularSpeed = 0;
-        } else if (etiqueta === 'RETROCEDER') {
-            this.state.linearSpeed = -0.036;
-            this.state.cabinAngularSpeed = 0;
-        } else if (etiqueta === 'IZQUIERDA') {
-            // Rota la cabina hacia la izquierda de forma continua mientras se mantiene
-            this.state.cabinAngularSpeed = 0.045;
+    playHornBeep() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            const ctx = new AudioCtx();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(340, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(280, ctx.currentTime + 0.25);
+            gain.gain.setValueAtTime(0.12, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.28);
+        } catch (_) {}
+    }
+
+    aplicarComando(idComando, etiqueta = '') {
+        const cmd = Number(idComando);
+        const upper = String(etiqueta).toUpperCase();
+
+        if (cmd === 11 || upper === 'AVANZAR') {
+            this.state.linearSpeed = 0.036 * this.state.speedMultiplier;
+            this.state.chassisAngularSpeed = 0;
+        } else if (cmd === 12 || upper === 'RETROCEDER') {
+            this.state.linearSpeed = -0.036 * this.state.speedMultiplier;
+            this.state.chassisAngularSpeed = 0;
+        } else if (cmd === 13 || upper === 'GIRAR IZQUIERDA') {
+            this.state.chassisAngularSpeed = 0.032 * this.state.speedMultiplier;
             this.state.linearSpeed = 0;
-        } else if (etiqueta === 'DERECHA') {
-            // Rota la cabina hacia la derecha de forma continua mientras se mantiene
-            this.state.cabinAngularSpeed = -0.045;
+        } else if (cmd === 14 || upper === 'GIRAR DERECHA') {
+            this.state.chassisAngularSpeed = -0.032 * this.state.speedMultiplier;
             this.state.linearSpeed = 0;
-        } else if (etiqueta === 'GIRO IZQ 90°') {
-            // Rota la cabina 90 grados a la izquierda sobre las orugas
+        } else if (cmd === 15 || upper.includes('CABINA IZQ')) {
+            // 15: Gira Cabina Izquierda 90° independiente sobre las orugas
             this.state.targetCabinYawRad += Math.PI / 2;
             this.state.linearSpeed = 0;
-            this.state.cabinAngularSpeed = 0;
-        } else if (etiqueta === 'GIRO DER 90°') {
-            // Rota la cabina 90 grados a la derecha sobre las orugas
+            this.state.chassisAngularSpeed = 0;
+        } else if (cmd === 16 || upper.includes('CABINA DER')) {
+            // 16: Gira Cabina Derecha 90° independiente sobre las orugas
             this.state.targetCabinYawRad -= Math.PI / 2;
             this.state.linearSpeed = 0;
-            this.state.cabinAngularSpeed = 0;
-        } else if (etiqueta === 'SUBIR GARRA') {
+            this.state.chassisAngularSpeed = 0;
+        } else if (cmd === 17 || upper.includes('ELEVAR') || upper.includes('SUBIR')) {
+            // 17: Elevar Garra
             this.state.armElevation = Math.min(1, this.state.armElevation + 0.25);
-        } else if (etiqueta === 'BAJAR GARRA') {
+        } else if (cmd === 18 || upper.includes('BAJAR')) {
+            // 18: Bajar Garra
             this.state.armElevation = Math.max(0, this.state.armElevation - 0.25);
-        } else if (etiqueta === 'NEUTRAL' || etiqueta.includes('STOP')) {
+        } else if (cmd === 19 || upper.includes('VELOCIDAD')) {
+            // 19: Alternar velocidad normal / turbo
+            this.state.speedMultiplier = this.state.speedMultiplier === 1.0 ? 1.8 : 1.0;
+        } else if (cmd === 21 || upper.includes('SONIDO')) {
+            // 21: Claxon
+            this.playHornBeep();
+        } else if (cmd === 0 || cmd === 20 || upper === 'NEUTRAL' || upper.includes('STOP') || upper.includes('ENC/APAG')) {
+            // 20 / 0: Detener / Enc-Apag
             this.state.linearSpeed = 0;
-            this.state.cabinAngularSpeed = 0;
+            this.state.chassisAngularSpeed = 0;
         }
     }
 
@@ -336,11 +359,12 @@ export class Excavator3DManager {
         this.state.posX = 0;
         this.state.posZ = 0;
         this.state.chassisYawRad = 0;
+        this.state.chassisAngularSpeed = 0;
         this.state.cabinYawRad = 0;
         this.state.targetCabinYawRad = 0;
-        this.state.cabinAngularSpeed = 0;
         this.state.armElevation = 0.5;
         this.state.linearSpeed = 0;
+        this.state.speedMultiplier = 1.0;
         this.state.cameraOrbitYaw = 0.72;
         this.state.cameraOrbitPitch = 0.44;
     }
@@ -358,11 +382,15 @@ export class Excavator3DManager {
     animate() {
         requestAnimationFrame(this.animate);
 
-        // Actualizar rotación independiente de la cabina
-        this.state.targetCabinYawRad += this.state.cabinAngularSpeed;
+        // Rotación del chasis/orugas (IDs 13 y 14)
+        if (this.state.chassisAngularSpeed !== 0) {
+            this.state.chassisYawRad += this.state.chassisAngularSpeed;
+        }
+
+        // Rotación independiente de la cabina (IDs 15 y 16)
         this.state.cabinYawRad += (this.state.targetCabinYawRad - this.state.cabinYawRad) * 0.14;
 
-        // Desplazamiento lineal de las orugas
+        // Desplazamiento lineal de las orugas (IDs 11 y 12)
         if (this.state.linearSpeed !== 0) {
             this.state.posX += Math.cos(this.state.chassisYawRad) * this.state.linearSpeed;
             this.state.posZ -= Math.sin(this.state.chassisYawRad) * this.state.linearSpeed;
@@ -370,6 +398,7 @@ export class Excavator3DManager {
             this.state.posZ = Math.max(-5.2, Math.min(5.2, this.state.posZ));
         }
 
+        // Elevación de la garra/brazo (IDs 17 y 18)
         const targetBoomAngle = (this.state.armElevation - 0.5) * 0.75;
         const targetStickAngle = (0.5 - this.state.armElevation) * 0.65;
 

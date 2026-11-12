@@ -4,10 +4,10 @@
 
 export class JoystickController {
   /**
-   * @param {HTMLElement} zoneElement - Elemento contenedor del joystick (#joystick-zone)
-   * @param {HTMLElement} knobElement - Elemento perilla del joystick (#joystick-knob)
-   * @param {Function} onCommandCallback - Callback emitido al cambiar dirección/comando (idComando)
-   * @param {Function} onStatusCallback - Callback para actualizar el texto visual de dirección
+   * @param {HTMLElement} zoneElement Elemento contenedor del joystick (#joystick-zone)
+   * @param {HTMLElement} knobElement Elemento perilla del joystick (#joystick-knob)
+   * @param {Function} onCommandCallback Callback emitido al cambiar dirección/comando (idComando)
+   * @param {Function} onStatusCallback Callback para actualizar el texto visual de dirección
    */
   constructor(zoneElement, knobElement, onCommandCallback, onStatusCallback) {
     this.zone = zoneElement;
@@ -17,15 +17,15 @@ export class JoystickController {
 
     this.activePointerId = null;
     this.isDragging = false;
-    this.currentCommand = 0; // 0 = DETENER / NEUTRAL
+    this.currentCommand = 0;
 
-    // Mapeo de comandos de dirección según el catálogo del vehículo
+    // Mapeo de comandos de dirección según el catálogo real en Amazon RDS
     this.COMMANDS = {
       NEUTRAL: 0,
       AVANZAR: 11,
       RETROCEDER: 12,
-      IZQUIERDA: 13,
-      DERECHA: 14
+      GIRAR_IZQUIERDA: 13,
+      GIRAR_DERECHA: 14
     };
 
     this.initEvents();
@@ -68,7 +68,7 @@ export class JoystickController {
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
 
-    const maxRadius = (rect.width / 2) - 15; // Límite de desplazamiento interno
+    const maxRadius = (rect.width / 2) - 15;
 
     let deltaX = e.clientX - centerX;
     let deltaY = e.clientY - centerY;
@@ -80,10 +80,8 @@ export class JoystickController {
       deltaY = Math.sin(angle) * maxRadius;
     }
 
-    // Mover perilla visualmente
     this.knob.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
 
-    // Evaluar dirección solo si sobrepasa la zona muerta (20px)
     const deadzone = 20;
     if (distance < deadzone) {
       this.setCommand(this.COMMANDS.NEUTRAL, 'NEUTRAL');
@@ -93,7 +91,6 @@ export class JoystickController {
   }
 
   evaluarDireccion(x, y) {
-    // Ángulo en grados (-180 a 180)
     const angleDeg = Math.atan2(y, x) * (180 / Math.PI);
 
     let nuevoComando = this.COMMANDS.NEUTRAL;
@@ -103,14 +100,14 @@ export class JoystickController {
       nuevoComando = this.COMMANDS.AVANZAR;
       etiqueta = 'AVANZAR';
     } else if (angleDeg >= -45 && angleDeg < 45) {
-      nuevoComando = this.COMMANDS.DERECHA;
-      etiqueta = 'DERECHA';
+      nuevoComando = this.COMMANDS.GIRAR_DERECHA;
+      etiqueta = 'GIRAR DERECHA';
     } else if (angleDeg >= 45 && angleDeg < 135) {
       nuevoComando = this.COMMANDS.RETROCEDER;
       etiqueta = 'RETROCEDER';
     } else {
-      nuevoComando = this.COMMANDS.IZQUIERDA;
-      etiqueta = 'IZQUIERDA';
+      nuevoComando = this.COMMANDS.GIRAR_IZQUIERDA;
+      etiqueta = 'GIRAR IZQUIERDA';
     }
 
     this.setCommand(nuevoComando, etiqueta);

@@ -6,52 +6,57 @@ document.addEventListener('DOMContentLoaded', () => {
     const WS_URL = 'wss://control-iot-uriel.duckdns.org/ws/1';
     const ID_VEHICULO = 1;
 
+    // Catálogo idéntico a la tabla `comandos` en Amazon RDS (IDs 11 al 21)
     const NOMBRES_COMANDOS = {
-        0: 'DETENER (STOP)',
         11: 'AVANZAR',
         12: 'RETROCEDER',
-        13: 'IZQUIERDA',
-        14: 'DERECHA',
-        15: 'SUBIR GARRA',
-        16: 'BAJAR GARRA',
-        17: 'GIRO IZQ 90°',
-        18: 'GIRO DER 90°',
-        20: 'EJECUCIÓN DEMO'
+        13: 'GIRAR IZQUIERDA',
+        14: 'GIRAR DERECHA',
+        15: 'GIRA CABINA IZQUIERDA',
+        16: 'GIRA CABINA DERECHA',
+        17: 'ELEVAR GARRA',
+        18: 'BAJAR GARRA',
+        19: 'VELOCIDAD',
+        20: 'ENC/APAG',
+        21: 'SONIDO'
     };
 
     function obtenerIconoMovimiento(codigo, texto = '') {
         const c = Number(codigo);
         const upper = String(texto).toUpperCase();
 
-        if (c === 0 || upper.includes('STOP') || upper.includes('DETENER')) {
-            return { icon: 'bx bxs-octagon', theme: 'stop-mode' };
-        }
         if (c === 11 || upper.includes('AVANZAR')) {
             return { icon: 'bx bx-up-arrow-alt', theme: 'move-mode' };
         }
         if (c === 12 || upper.includes('RETROCEDER')) {
             return { icon: 'bx bx-down-arrow-alt', theme: 'move-mode' };
         }
-        if (c === 13 || upper === 'IZQUIERDA') {
+        if (c === 13 || upper === 'GIRAR IZQUIERDA' || upper === 'IZQUIERDA') {
             return { icon: 'bx bx-left-arrow-alt', theme: 'turn-mode' };
         }
-        if (c === 14 || upper === 'DERECHA') {
+        if (c === 14 || upper === 'GIRAR DERECHA' || upper === 'DERECHA') {
             return { icon: 'bx bx-right-arrow-alt', theme: 'turn-mode' };
         }
-        if (c === 15 || upper.includes('SUBIR')) {
-            return { icon: 'bx bx-up-arrow-circle', theme: '' };
-        }
-        if (c === 16 || upper.includes('BAJAR')) {
-            return { icon: 'bx bx-down-arrow-circle', theme: '' };
-        }
-        if (c === 17 || upper.includes('GIRO IZQ')) {
+        if (c === 15 || upper.includes('CABINA IZQ')) {
             return { icon: 'bx bx-undo', theme: 'turn-mode' };
         }
-        if (c === 18 || upper.includes('GIRO DER')) {
+        if (c === 16 || upper.includes('CABINA DER')) {
             return { icon: 'bx bx-redo', theme: 'turn-mode' };
         }
-        if (c === 20 || upper.includes('DEMO')) {
-            return { icon: 'bx bx-play-circle', theme: '' };
+        if (c === 17 || upper.includes('ELEVAR') || upper.includes('SUBIR')) {
+            return { icon: 'bx bx-up-arrow-circle', theme: '' };
+        }
+        if (c === 18 || upper.includes('BAJAR')) {
+            return { icon: 'bx bx-down-arrow-circle', theme: '' };
+        }
+        if (c === 19 || upper.includes('VELOCIDAD')) {
+            return { icon: 'bx bx-tachometer', theme: '' };
+        }
+        if (c === 20 || upper.includes('ENC/APAG') || upper.includes('STOP') || upper.includes('DETENER')) {
+            return { icon: 'bx bxs-octagon', theme: 'stop-mode' };
+        }
+        if (c === 21 || upper.includes('SONIDO')) {
+            return { icon: 'bx bx-volume-full', theme: 'turn-mode' };
         }
         return { icon: 'bx bx-radio-circle-marked', theme: '' };
     }
@@ -149,14 +154,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const timeoutId = setTimeout(() => controller.abort(), 4500);
 
         try {
-            // Sin caché para detectar al instante si EC2/FastAPI se apaga
             const resp = await fetch(`${BASE_URL}/vehiculos/1/historial?_t=${Date.now()}`, {
                 cache: 'no-store',
                 signal: controller.signal
             });
             clearTimeout(timeoutId);
 
-            // Si FastAPI responde con cualquier código válido (<500), EC2 está activa
             if (resp.status < 500) {
                 apiOnline = true;
                 setBadgeState('api-status-bar', 'api-status-icon', 'api-status', 'online', 'EC2 Activa', 'bx bx-check-circle');
@@ -168,7 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Verificar que Amazon RDS devolvió una estructura real de datos MySQL
             if (resp.ok) {
                 const data = await resp.json();
                 const tieneEstructuraReal = Array.isArray(data) || Array.isArray(data.historial) || Array.isArray(data.datos);
@@ -322,7 +324,6 @@ document.addEventListener('DOMContentLoaded', () => {
             socket = new WebSocket(WS_URL);
 
             socket.onopen = () => {
-                // Esperamos confirmación real del servidor FastAPI antes de marcar online
                 registrarEvento('Socket abierto, esperando saludo JSON del servidor...');
             };
 
@@ -337,9 +338,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     const payload = JSON.parse(event.data);
                     if (payload && payload.id_comando !== undefined) {
-                        const etiqueta = NOMBRES_COMANDOS[payload.id_comando] || `CMD ${payload.id_comando}`;
-                        sim3D.aplicarComando(etiqueta);
-                        actualizarPanelUltimoMovimiento(payload.id_comando, etiqueta, payload.origen || 'WSS');
+                        const cmdNum = Number(payload.id_comando);
+                        const etiqueta = NOMBRES_COMANDOS[cmdNum] || `CMD ${cmdNum}`;
+                        sim3D.aplicarComando(cmdNum, etiqueta);
+                        if (hudState) hudState.textContent = etiqueta;
+                        if (directionBadge) directionBadge.textContent = etiqueta;
+                        actualizarPanelUltimoMovimiento(cmdNum, etiqueta, payload.origen || 'WSS');
                         cargarHistorialRDS();
                     }
                 } catch (_) {}
@@ -365,10 +369,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Botón para conectar/desconectar WebSocket manualmente cuando tú quieras
     btnWsToggle?.addEventListener('click', conectarWebSocket);
 
-    // Verificación inicial real de EC2 y RDS (sin falsos positivos)
     verificarSaludBackend();
     cargarDemosDisponibles();
     cargarHistorialRDS();
@@ -382,12 +384,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================
     // 5. ENVÍO DE COMANDOS A FASTAPI + SIMULACIÓN 3D
     // =========================================================
-    async function enviarComando(idComando, etiqueta, origen = 'WEB') {
-        sim3D.aplicarComando(etiqueta);
+    async function enviarComando(idComando, etiquetaPersonalizada = null, origen = 'WEB') {
+        const cmdNum = Number(idComando);
+        const etiqueta = etiquetaPersonalizada || NOMBRES_COMANDOS[cmdNum] || `CMD ${cmdNum}`;
+
+        sim3D.aplicarComando(cmdNum, etiqueta);
         if (hudState) hudState.textContent = etiqueta;
         if (directionBadge) directionBadge.textContent = etiqueta;
-        registrarEvento(`Comando [${idComando}]: ${etiqueta}`);
-        actualizarPanelUltimoMovimiento(idComando, etiqueta, origen);
+        registrarEvento(`Comando [${cmdNum}]: ${etiqueta}`);
+        actualizarPanelUltimoMovimiento(cmdNum, etiqueta, origen);
 
         try {
             const resp = await fetch(`${BASE_URL}/vehiculos/movimiento`, {
@@ -395,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     id_vehiculo: ID_VEHICULO,
-                    id_comando: Number(idComando),
+                    id_comando: cmdNum,
                     origen
                 })
             });
@@ -409,7 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Joystick Virtual
+    // Joystick Virtual (11=Avanzar, 12=Retroceder, 13=Girar Izq, 14=Girar Der, 0=Soltar/Neutral)
     const zoneEl = document.getElementById('joystick-zone');
     const knobEl = document.getElementById('joystick-knob');
 
@@ -418,21 +423,32 @@ document.addEventListener('DOMContentLoaded', () => {
             zoneEl,
             knobEl,
             (idComando) => {
-                enviarComando(idComando, NOMBRES_COMANDOS[idComando] || 'MOVIMIENTO', 'JOYSTICK');
+                if (idComando > 0) {
+                    enviarComando(idComando, NOMBRES_COMANDOS[idComando], 'JOYSTICK');
+                }
             },
             (etiqueta) => {
                 if (directionBadge) directionBadge.textContent = etiqueta;
                 if (hudState) hudState.textContent = etiqueta;
-                sim3D.aplicarComando(etiqueta);
+                if (etiqueta === 'NEUTRAL') {
+                    sim3D.aplicarComando(0, 'NEUTRAL');
+                }
             }
         );
     }
 
+    // Botones de Actuadores (11, 12, 15, 16, 17, 18, 19, 21)
     document.querySelectorAll('.actuator-btn').forEach((btn) => {
-        btn.addEventListener('click', () => enviarComando(btn.dataset.cmd, btn.dataset.label, 'BOTON_WEB'));
+        btn.addEventListener('click', () => {
+            const cmdId = Number(btn.dataset.cmd);
+            enviarComando(cmdId, NOMBRES_COMANDOS[cmdId] || btn.dataset.label, 'BOTON_WEB');
+        });
     });
 
-    document.getElementById('btn-stop')?.addEventListener('click', () => enviarComando(0, 'DETENER (STOP)', 'STOP_WEB'));
+    // Botón Stop / Enc-Apag (ID 20 real de RDS)
+    document.getElementById('btn-stop')?.addEventListener('click', () => {
+        enviarComando(20, 'ENC/APAG (STOP)', 'STOP_WEB');
+    });
 
     const btnRunSeq = document.getElementById('btn-run-sequence');
     const seqSelect = document.getElementById('sequence-select');
@@ -500,11 +516,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (event.results[0].isFinal) {
                         if (texto.includes('avanza') || texto.includes('adelante')) enviarComando(11, 'AVANZAR', 'VOZ_IA');
                         else if (texto.includes('retrocede') || texto.includes('atrás')) enviarComando(12, 'RETROCEDER', 'VOZ_IA');
-                        else if (texto.includes('izquierda')) enviarComando(13, 'IZQUIERDA', 'VOZ_IA');
-                        else if (texto.includes('derecha')) enviarComando(14, 'DERECHA', 'VOZ_IA');
-                        else if (texto.includes('subir') || texto.includes('arriba')) enviarComando(15, 'SUBIR GARRA', 'VOZ_IA');
-                        else if (texto.includes('bajar') || texto.includes('abajo')) enviarComando(16, 'BAJAR GARRA', 'VOZ_IA');
-                        else if (texto.includes('detener') || texto.includes('alto') || texto.includes('stop')) enviarComando(0, 'DETENER (STOP)', 'VOZ_IA');
+                        else if (texto.includes('cabina izquierda')) enviarComando(15, 'GIRA CABINA IZQUIERDA', 'VOZ_IA');
+                        else if (texto.includes('cabina derecha')) enviarComando(16, 'GIRA CABINA DERECHA', 'VOZ_IA');
+                        else if (texto.includes('izquierda')) enviarComando(13, 'GIRAR IZQUIERDA', 'VOZ_IA');
+                        else if (texto.includes('derecha')) enviarComando(14, 'GIRAR DERECHA', 'VOZ_IA');
+                        else if (texto.includes('subir') || texto.includes('elevar') || texto.includes('arriba')) enviarComando(17, 'ELEVAR GARRA', 'VOZ_IA');
+                        else if (texto.includes('bajar') || texto.includes('abajo')) enviarComando(18, 'BAJAR GARRA', 'VOZ_IA');
+                        else if (texto.includes('velocidad')) enviarComando(19, 'VELOCIDAD', 'VOZ_IA');
+                        else if (texto.includes('sonido') || texto.includes('claxon') || texto.includes('pita')) enviarComando(21, 'SONIDO', 'VOZ_IA');
+                        else if (texto.includes('detener') || texto.includes('alto') || texto.includes('stop') || texto.includes('apagar')) enviarComando(20, 'ENC/APAG (STOP)', 'VOZ_IA');
                     }
                 };
 
