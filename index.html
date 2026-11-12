@@ -1,146 +1,155 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Control IoT - Excavadora RC</title>
-    <!-- Iconos modernos -->
+    <title>Excavadora IoT</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Animación de fondo (Orbes líquidos) -->
-    <div class="ambient-background">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
+    <!-- Fondo dinámico -->
+    <div class="ambient-bg">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
     </div>
 
-    <!-- Encabezado superior tipo Dynamic Island -->
+    <!-- Header Premium -->
     <header class="glass-header">
-        <h1 class="app-title"><i class='bx bxs-tractor'></i> CONTROL EXCAVADORA IoT</h1>
-        <div class="header-status-group">
-            <div class="status-indicator">
-                <i class='bx bx-wifi'></i>
-                <span id="ws-status" class="status-text green">WSS</span>
+        <div class="brand">
+            <i class='bx bxs-tractor text-accent'></i>
+            <div>
+                <h1>Excavadora IoT</h1>
+                <p>Control • Monitoreo • Inteligencia</p>
             </div>
-            <div class="status-indicator">
-                <i class='bx bx-cloud'></i>
-                <span id="api-status" class="status-text green">API</span>
+        </div>
+        
+        <div class="header-controls">
+            <div class="status-pill active">
+                <i class='bx bx-wifi'></i> WSS Conectado
             </div>
-            <div class="status-indicator">
-                <i class='bx bx-data'></i>
-                <span id="rds-status" class="status-text green">RDS</span>
-            </div>
+            <button id="theme-toggle" class="icon-btn" aria-label="Cambiar tema">
+                <i class='bx bx-sun'></i>
+            </button>
         </div>
     </header>
 
-    <!-- Contenedor principal de vistas -->
-    <main class="app-content">
+    <!-- Indicadores de Estado Globales -->
+    <div class="system-status-grid">
+        <div class="glass-card mini-stat">
+            <i class='bx bx-pulse text-green'></i>
+            <div class="stat-info">
+                <span>Estado API</span>
+                <strong>Operativo <div class="dot green"></div></strong>
+            </div>
+        </div>
+        <div class="glass-card mini-stat">
+            <i class='bx bx-data text-blue'></i>
+            <div class="stat-info">
+                <span>Base de Datos</span>
+                <strong>RDS Activo <div class="dot blue"></div></strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor Principal de Vistas -->
+    <main class="app-viewport">
         
-        <!-- PESTAÑA 1: CONTROL MANUAL (Tu app original) -->
+        <!-- VISTA: CONTROL (Dashboard principal) -->
         <section id="view-control" class="view active">
-            
-            <div class="glass-panel">
-                <h2><i class='bx bx-joystick'></i> Joystick Principal</h2>
-                <div id="joystick-zone" style="height: 250px; position: relative; margin: 20px 0;">
-                    <!-- Aquí el JS de nipplejs renderiza tu joystick -->
+            <div class="dashboard-grid">
+                <!-- Panel 3D (Simulación) -->
+                <div class="glass-card panel-3d">
+                    <div class="card-header">
+                        <h2><i class='bx bx-cube'></i> Simulación en Tiempo Real</h2>
+                        <button class="icon-btn mini"><i class='bx bx-fullscreen'></i></button>
+                    </div>
+                    <div class="canvas-placeholder">
+                        <i class='bx bx-loader-alt bx-spin'></i>
+                        <p>Motor 3D en espera...</p>
+                    </div>
                 </div>
-                <p style="text-align: center; font-size: 0.8rem; color: var(--text-secondary);">Arrastra para mover • Suelta para detener</p>
-            </div>
 
-            <div class="glass-panel">
-                <button id="btn-stop" class="glass-btn danger">
-                    <i class='bx bx-stop-circle'></i> DETENER VEHÍCULO (STOP)
-                </button>
-            </div>
+                <!-- Panel de Control Manual -->
+                <div class="glass-card panel-controls">
+                    <div class="card-header highlight">
+                        <h2><i class='bx bxs-joystick'></i> Control Manual</h2>
+                    </div>
+                    
+                    <div class="controls-layout">
+                        <!-- Joystick -->
+                        <div class="joystick-wrapper">
+                            <div id="joystick-zone"></div>
+                        </div>
 
-            <div class="glass-panel commands-container">
-                <h2><i class='bx bx-slider-alt'></i> Controles del Vehículo</h2>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-                    <button class="glass-btn"><i class='bx bx-up-arrow-alt'></i> Subir Garra</button>
-                    <button class="glass-btn"><i class='bx bx-down-arrow-alt'></i> Bajar Garra</button>
-                    <button class="glass-btn"><i class='bx bx-undo'></i> Giro Izq 90°</button>
-                    <button class="glass-btn"><i class='bx bx-redo'></i> Giro Der 90°</button>
-                </div>
-            </div>
+                        <!-- Botones de Acción -->
+                        <div class="action-buttons">
+                            <button class="glass-btn"><i class='bx bx-up-arrow-alt'></i> Brazo ↑</button>
+                            <button class="glass-btn"><i class='bx bx-down-arrow-alt'></i> Brazo ↓</button>
+                            <button class="glass-btn"><i class='bx bx-undo'></i> Giro Izq.</button>
+                            <button class="glass-btn"><i class='bx bx-redo'></i> Giro Der.</button>
+                        </div>
+                    </div>
 
-            <div class="glass-panel">
-                <h2><i class='bx bx-play-circle'></i> Secuencias Preprogramadas</h2>
-                <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <select class="glass-select" style="flex: 1; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.5); color: white; border: 1px solid var(--glass-border);">
-                        <option value="demo1">Demo Principal</option>
-                        <option value="demo2">Excavar y Soltar</option>
-                    </select>
-                    <button class="glass-btn accent" style="background: var(--accent-color); color: black; border: none;">
-                        <i class='bx bx-play'></i> Ejecutar
-                    </button>
+                    <div class="movement-controls">
+                        <p class="subtitle"><i class='bx bx-run'></i> Secuencias</p>
+                        <div class="btn-group">
+                            <select class="glass-input">
+                                <option>Demo Principal</option>
+                                <option>Excavar</option>
+                            </select>
+                            <button class="glass-btn primary"><i class='bx bx-play'></i></button>
+                        </div>
+                        <button class="glass-btn danger mt-10"><i class='bx bx-stop-circle'></i> DETENER</button>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- PESTAÑA 2: ANIMACIÓN 3D -->
-        <section id="view-3d" class="view">
-            <div class="glass-panel full-height" style="height: 70vh; display: flex; flex-direction: column;">
-                <h2><i class='bx bx-cube-alt'></i> Telemetría 3D en Vivo</h2>
-                <div id="canvas-3d-container" style="flex: 1; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); border-radius: 15px; margin-top: 15px;">
-                    <p class="placeholder-text" style="color: var(--text-secondary);"><i class='bx bx-loader-alt bx-spin'></i> Inicializando motor gráfico...</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- PESTAÑA 3: CONTROL POR VOZ -->
+        <!-- VISTA: VOZ IA -->
         <section id="view-voice" class="view">
-            <div class="glass-panel full-height" style="height: 70vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-                <h2><i class='bx bx-microphone'></i> Asistente IA</h2>
-                <p style="color: var(--text-secondary); margin-bottom: 30px;">Toca para hablar. Intenta decir: "Avanzar", "Subir garra" o "Detener"</p>
-                <div class="voice-visualizer">
-                    <button id="btn-mic" class="glass-btn round" style="width: 100px; height: 100px; border-radius: 50%; font-size: 3rem; background: rgba(255, 183, 3, 0.2); border-color: var(--accent-color); color: var(--accent-color);">
-                        <i class='bx bx-microphone'></i>
-                    </button>
-                </div>
-                <div id="voice-transcript" style="margin-top: 30px; font-style: italic; color: #fff;">Escuchando...</div>
+            <div class="glass-card full-center">
+                <i class='bx bx-bot giant-icon'></i>
+                <h2>Asistente de Voz IA</h2>
+                <p>Presiona el micrófono y di "Avanzar"</p>
+                <button class="glass-btn circle-huge pulse-animation"><i class='bx bxs-microphone'></i></button>
             </div>
         </section>
 
-        <!-- PESTAÑA 4: GESTOS (CÁMARA) -->
+        <!-- VISTA: GESTOS -->
         <section id="view-gestures" class="view">
-            <div class="glass-panel full-height" style="height: 70vh; display: flex; flex-direction: column;">
-                <h2><i class='bx bx-hand'></i> Control por Gestos</h2>
-                <div class="camera-feed" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); border-radius: 15px; margin-top: 15px;">
-                    <i class='bx bx-video-off' style="font-size: 3rem; color: var(--text-secondary); margin-bottom: 10px;"></i>
-                    <p style="color: var(--text-secondary);">Cámara apagada</p>
-                    <button class="glass-btn" style="margin-top: 15px;"><i class='bx bx-video'></i> Activar Cámara</button>
+            <div class="glass-card full-center">
+                <i class='bx bx-hand giant-icon'></i>
+                <h2>Control Espacial por Gestos</h2>
+                <div class="camera-frame">
+                    <i class='bx bx-video-off'></i>
+                    <p>Cámara inactiva</p>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- Barra de navegación inferior (Liquid Glass) -->
-    <nav class="bottom-nav glass-nav">
-        <a href="#" class="nav-item active" data-target="view-control">
-            <i class='bx bx-joystick'></i>
-            <span>Control</span>
-        </a>
-        <a href="#" class="nav-item" data-target="view-3d">
-            <i class='bx bx-cube-alt'></i>
-            <span>3D View</span>
-        </a>
-        <a href="#" class="nav-item" data-target="view-voice">
-            <i class='bx bx-microphone'></i>
-            <span>Voz IA</span>
-        </a>
-        <a href="#" class="nav-item" data-target="view-gestures">
-            <i class='bx bx-hand'></i>
-            <span>Gestos</span>
-        </a>
+    <!-- Barra Nav Estilo WhatsApp Liquid Glass -->
+    <nav class="liquid-nav-container">
+        <div class="liquid-nav">
+            <div class="nav-refraction"></div>
+            <a href="#" class="nav-item active" data-target="view-control">
+                <div class="nav-icon"><i class='bx bxs-joystick'></i></div>
+                <span>Control</span>
+            </a>
+            <a href="#" class="nav-item" data-target="view-voice">
+                <div class="nav-icon"><i class='bx bx-microphone'></i><div class="badge">IA</div></div>
+                <span>Voz</span>
+            </a>
+            <a href="#" class="nav-item" data-target="view-gestures">
+                <div class="nav-icon"><i class='bx bx-hand'></i></div>
+                <span>Gestos</span>
+            </a>
+        </div>
     </nav>
 
-    <!-- Tus scripts -->
-    <script src="js/api.js"></script>
-    <script src="js/websocket.js"></script>
-    <script src="js/navigation.js"></script>
-    <!-- Asegúrate de incluir el script de tu joystick (ej. nipplejs) si lo tienes externo -->
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
 </body>
 </html>
