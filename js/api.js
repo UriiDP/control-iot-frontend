@@ -3,7 +3,7 @@
    ========================================================================== */
 
 // Configuración de la URL Base de tu API en AWS
-const API_BASE_URL = 'https://baptist-swaziland-theorem-buy.trycloudflare.com';
+const API_BASE_URL = 'https://control-iot-uriel.duckdns.org';
 
 export const ApiService = {
   
