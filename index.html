@@ -4,10 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Control Excavadora IoT • Panel Avanzado</title>
+
+    <!-- Favicon Vectorial Personalizado (Excavadora Geométrica) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23ffe169'/%3E%3Cstop offset='100%25' stop-color='%23f59e0b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='%230b0d14'/%3E%3Crect x='2' y='2' width='60' height='60' rx='14' fill='none' stroke='%23ffb703' stroke-opacity='0.45' stroke-width='2'/%3E%3Crect x='10' y='44' width='32' height='9' rx='4.5' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='48.5' r='2' fill='%230b0d14'/%3E%3Ccircle cx='26' cy='48.5' r='2' fill='%230b0d14'/%3E%3Ccircle cx='36' cy='48.5' r='2' fill='%230b0d14'/%3E%3Cpath d='M13 42V30a3 3 0 0 1 3-3h12l5 7v8H13z' fill='url(%23g)'/%3E%3Cpath d='M31 33l12-15 10 9-4 8' fill='none' stroke='%2338bdf8' stroke-width='4.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M45 34l9 2-2.5 7.5-7.5-2z' fill='%23ffb703'/%3E%3C/svg%3E">
+
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Motor gráfico Three.js para simulación 3D en tiempo real -->
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 </head>
 <body>
+    <!-- Filtro SVG Óptico para Refracción Liquid Glass -->
+    <svg width="0" height="0" style="position: absolute; pointer-events: none;" aria-hidden="true">
+        <defs>
+            <filter id="liquid-glass-refraction" x="-15%" y="-15%" width="130%" height="130%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.018 0.025" numOctaves="2" seed="7" result="noise"/>
+                <feGaussianBlur in="noise" stdDeviation="2.2" result="smoothNoise"/>
+                <feDisplacementMap in="SourceGraphic" in2="smoothNoise" scale="7" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+        </defs>
+    </svg>
+
     <!-- Fondo ambiental con orbes líquidos -->
     <div class="ambient-bg" aria-hidden="true">
         <div class="glow-orb orb-1"></div>
@@ -20,7 +38,6 @@
     <header class="glass-header">
         <div class="brand">
             <div class="brand-icon" aria-hidden="true">
-                <!-- SVG nítido de excavadora -->
                 <svg viewBox="0 0 64 64" width="28" height="28" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="8" y="44" width="34" height="10" rx="5" fill="currentColor" fill-opacity="0.2"/>
                     <circle cx="14" cy="49" r="2" fill="currentColor"/>
@@ -33,31 +50,34 @@
             </div>
             <div class="brand-text">
                 <h1>CONTROL EXCAVADORA IoT</h1>
-                <p>Vehículo ID: <strong>1</strong> • Control • Monitoreo • IA</p>
+                <p>Vehículo ID: <strong>1</strong> • Control • Telemetría 3D • IA</p>
             </div>
         </div>
 
         <div class="header-actions">
-            <div class="connection-badge" id="global-conn-badge">
+            <div class="connection-badge checking" id="global-conn-badge">
                 <span class="pulse-dot"></span>
-                <span>Sistema en Línea</span>
+                <span id="global-conn-text">Sincronizando...</span>
             </div>
+            <button id="btn-refresh-status" class="glass-icon-btn" title="Verificar conexión AWS / RDS / WSS" aria-label="Verificar conexión">
+                <i class="bx bx-refresh"></i>
+            </button>
             <button id="theme-toggle" class="glass-icon-btn" title="Cambiar modo Claro / Oscuro" aria-label="Cambiar tema">
                 <i class="bx bx-sun" id="theme-icon"></i>
             </button>
         </div>
     </header>
 
-    <!-- Barra de telemetría superior (WSS, API, RDS) -->
+    <!-- Barra de telemetría superior en tiempo real (WSS, API, RDS) -->
     <section class="telemetry-bar">
         <div class="glass-card status-card">
             <div class="status-card-header">
                 <span>WebSocket WSS</span>
                 <i class="bx bx-wifi"></i>
             </div>
-            <div class="status-pill-bar online" id="ws-status-bar">
-                <i class="bx bx-broadcast"></i>
-                <span id="ws-status">En línea</span>
+            <div class="status-pill-bar checking" id="ws-status-bar">
+                <i class="bx bx-loader-alt bx-spin" id="ws-status-icon"></i>
+                <span id="ws-status">Conectando...</span>
             </div>
         </div>
 
@@ -66,20 +86,20 @@
                 <span>API AWS (EC2)</span>
                 <i class="bx bx-server"></i>
             </div>
-            <div class="status-pill-bar online" id="api-status-bar">
-                <i class="bx bx-check-circle"></i>
-                <span id="api-status">Disponible</span>
+            <div class="status-pill-bar checking" id="api-status-bar">
+                <i class="bx bx-loader-alt bx-spin" id="api-status-icon"></i>
+                <span id="api-status">Verificando...</span>
             </div>
         </div>
 
         <div class="glass-card status-card">
             <div class="status-card-header">
-                <span>Amazon RDS</span>
+                <span>Amazon RDS (MySQL)</span>
                 <i class="bx bx-data"></i>
             </div>
-            <div class="status-pill-bar online" id="rds-status-bar">
-                <i class="bx bx-hdd"></i>
-                <span id="rds-status">Disponible</span>
+            <div class="status-pill-bar checking" id="rds-status-bar">
+                <i class="bx bx-loader-alt bx-spin" id="rds-status-icon"></i>
+                <span id="rds-status">Verificando...</span>
             </div>
         </div>
     </section>
@@ -93,56 +113,27 @@
         <section id="view-control" class="view active">
             <div class="control-dashboard-grid">
 
-                <!-- Columna Izquierda: Simulación 3D en Tiempo Real -->
+                <!-- Columna Izquierda: Simulación 3D Real (Three.js) -->
                 <div class="glass-card sim-card">
                     <div class="card-top-bar">
                         <div class="card-title">
                             <i class="bx bx-cube-alt text-blue"></i>
-                            <h2>Simulación en Tiempo Real</h2>
+                            <h2>Simulación 3D en Tiempo Real</h2>
                         </div>
-                        <button class="glass-icon-btn mini" id="btn-expand-3d" title="Abrir vista 3D completa">
-                            <i class="bx bx-fullscreen"></i>
-                        </button>
+                        <div class="sim-controls-mini">
+                            <button class="glass-icon-btn mini" id="btn-reset-3d" title="Centrar excavadora 3D">
+                                <i class="bx bx-reset"></i>
+                            </button>
+                            <button class="glass-icon-btn mini" id="btn-expand-3d" title="Abrir vista 3D completa">
+                                <i class="bx bx-fullscreen"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="viewport-3d-preview" id="preview-3d-container">
-                        <div class="perspective-grid"></div>
-                        <div class="excavator-stage" id="excavator-stage">
-                            <div class="radar-ring ring-1"></div>
-                            <div class="radar-ring ring-2"></div>
-
-                            <!-- Modelo vectorial articulado que responde en tiempo real -->
-                            <div class="excavator-rig" id="excavator-rig">
-                                <svg viewBox="0 0 220 150" width="210" height="145" class="excavator-svg">
-                                    <!-- Sombra -->
-                                    <ellipse cx="95" cy="134" rx="68" ry="8" fill="rgba(0,0,0,0.45)"/>
-                                    <!-- Orugas -->
-                                    <rect x="34" y="108" width="96" height="22" rx="11" fill="#1e2430" stroke="#ffb703" stroke-width="2.5"/>
-                                    <circle cx="48" cy="119" r="5" fill="#ffb703"/>
-                                    <circle cx="82" cy="119" r="5" fill="#ffb703"/>
-                                    <circle cx="116" cy="119" r="5" fill="#ffb703"/>
-                                    <!-- Cabina -->
-                                    <g id="rig-cabin">
-                                        <path d="M42 106V68a6 6 0 0 1 6-6h36l16 20v24H42z" fill="#ffb703" stroke="#fff3c4" stroke-width="2"/>
-                                        <path d="M68 68h14l11 14H68V68z" fill="#0f172a" opacity="0.85"/>
-                                        <rect x="44" y="88" width="54" height="16" rx="3" fill="#d97706"/>
-                                    </g>
-                                    <!-- Brazo y Garra articulados -->
-                                    <g id="rig-arm" style="transform-origin: 96px 84px; transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);">
-                                        <path d="M96 84L142 36L176 66" fill="none" stroke="#ffb703" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M96 84L142 36L176 66" fill="none" stroke="#1e2430" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <circle cx="96" cy="84" r="6" fill="#fff"/>
-                                        <circle cx="142" cy="36" r="5" fill="#fff"/>
-                                        <!-- Pala / Garra -->
-                                        <path d="M170 64L194 70L186 92L166 84Z" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
-                                    </g>
-                                </svg>
-                                <span class="model-tag" id="sim-status-tag">GEMELO 3D ACTIVO</span>
-                            </div>
-                        </div>
-
+                        <!-- Aquí Three.js monta el canvas WebGL 3D -->
                         <div class="hud-telemetry-overlay">
-                            <div class="hud-chip"><span>Giro Base:</span> <strong id="hud-angle">0°</strong></div>
+                            <div class="hud-chip"><span>Rumbo:</span> <strong id="hud-angle">0°</strong></div>
                             <div class="hud-chip"><span>Brazo:</span> <strong id="hud-arm">50%</strong></div>
                             <div class="hud-chip"><span>Estado:</span> <strong id="hud-state">NEUTRAL</strong></div>
                         </div>
@@ -150,8 +141,8 @@
 
                     <!-- Consola de eventos WebSocket en vivo -->
                     <div class="console-log-bar" id="ws-log-bar">
-                        <span class="log-message" id="last-log-text">WebSocket conectado y listo para transmitir comandos.</span>
-                        <span class="log-time" id="last-log-time">00:00:00</span>
+                        <span class="log-message" id="last-log-text">Iniciando enlace con servidor AWS...</span>
+                        <span class="log-time" id="last-log-time">--:--:--</span>
                     </div>
                 </div>
 
@@ -242,19 +233,21 @@
                 <div class="card-top-bar">
                     <div class="card-title">
                         <i class="bx bx-cube text-blue"></i>
-                        <h2>Gemelo Digital 3D • Telemetría Mecánica</h2>
+                        <h2>Gemelo Digital 3D • Vista Interactiva 360°</h2>
                     </div>
-                    <div class="hud-chip" style="max-width: 140px;"><span>Motor:</span> <strong>WebGL Ready</strong></div>
+                    <div class="sim-controls-mini">
+                        <span class="hint-pill">Arrastra para rotar cámara</span>
+                        <button class="glass-icon-btn mini" id="btn-reset-3d-full" title="Centrar cámara">
+                            <i class="bx bx-reset"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="full-3d-stage" id="full-3d-canvas-container">
-                    <div class="perspective-grid"></div>
-                    <div class="excavator-stage">
-                        <div class="radar-ring ring-1"></div>
-                        <div class="radar-ring ring-2"></div>
-                        <div class="excavator-rig">
-                            <i class="bx bx-cube-alt" style="font-size: 4.5rem; color: var(--amber);"></i>
-                            <span class="model-tag">VISTA 3D EXPANDIDA LISTA PARA THREE.JS</span>
-                        </div>
+                    <!-- Three.js renderiza aquí la vista expandida en 3D -->
+                    <div class="hud-telemetry-overlay">
+                        <div class="hud-chip"><span>Posición X/Z:</span> <strong id="hud-pos-full">0.0, 0.0</strong></div>
+                        <div class="hud-chip"><span>Rumbo:</span> <strong id="hud-angle-full">0°</strong></div>
+                        <div class="hud-chip"><span>Elevación Garra:</span> <strong id="hud-arm-full">50%</strong></div>
                     </div>
                 </div>
             </div>
@@ -314,20 +307,24 @@
     </main>
 
     <!-- =========================================================
-         PIE DE PÁGINA
+         PIE DE PÁGINA FIJO HASTA ABAJO DEL DOCUMENTO
          ========================================================= -->
     <footer class="app-footer">
         <p>Desarrollado por <strong>Uriel Durán Peralta</strong> • 2026</p>
     </footer>
 
     <!-- =========================================================
-         BARRA DE NAVEGACIÓN INFERIOR (iOS / WHATSAPP LIQUID GLASS)
+         BARRA DE NAVEGACIÓN INFERIOR (iOS 26 LIQUID GLASS REAL)
          ========================================================= -->
     <nav class="liquid-dock-wrapper" aria-label="Navegación principal">
         <div class="liquid-dock" id="liquid-dock">
             <div class="glass-specular-top"></div>
             <div class="glass-specular-bottom"></div>
-            <div class="liquid-active-pill" id="liquid-active-pill"></div>
+
+            <!-- Lente óptico translúcido con refracción y blur dinámico -->
+            <div class="liquid-lens" id="liquid-lens">
+                <div class="lens-chromatic-rim"></div>
+            </div>
 
             <button class="dock-item active" data-target="view-control">
                 <div class="dock-icon"><i class="bx bxs-joystick"></i></div>
@@ -357,7 +354,7 @@
         </div>
     </nav>
 
-    <!-- Carga modular del controlador principal -->
+    <!-- Carga modular de la aplicación -->
     <script type="module" src="js/app.js"></script>
 </body>
 </html>
