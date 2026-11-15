@@ -210,13 +210,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     return `<option value="${id}">${nombre}</option>`;
                 }).join('');
             }
-        } catch (_) {}
+        } catch (_) { }
     }
 
     // =========================================================
     // 3. PESTAÑA DE MONITOREO E HISTORIAL RDS CON ÍCONO DINÁMICO
     // =========================================================
-    function actualizarPanelUltimoMovimiento(codigo, nombreAccion, origen = 'WEB') {
+    function actualizarPanelUltimoMovimiento(codigo, nombreAccion, origen = 'WEB', fechaCustom = null, horaCustom = null) {
         const now = new Date();
         const actionEl = document.getElementById('mon-last-action');
         const codeEl = document.getElementById('mon-codigo');
@@ -230,13 +230,66 @@ document.addEventListener('DOMContentLoaded', () => {
         const visual = obtenerIconoMovimiento(codigo, etiquetaFinal);
 
         if (actionEl) actionEl.textContent = etiquetaFinal;
-        if (codeEl) codeEl.textContent = codigo !== undefined ? `#${codigo}` : '—';
-        if (dateEl) dateEl.textContent = now.toLocaleDateString('es-MX');
-        if (timeEl) timeEl.textContent = now.toLocaleTimeString('es-MX');
-        if (originEl) originEl.textContent = `Origen: ${origen} • Sincronizado en tiempo real`;
+        if (codeEl) codeEl.textContent = codigo !== undefined && codigo !== '—' ? `#${codigo}` : '—';
+        if (dateEl) dateEl.textContent = fechaCustom || now.toLocaleDateString('es-MX');
+        if (timeEl) timeEl.textContent = horaCustom || now.toLocaleTimeString('es-MX');
+        if (originEl) originEl.textContent = `Origen: ${origen} • Sincronizado con RDS`;
 
         if (iconBox) iconBox.className = `pulse-wave-icon ${visual.theme}`.trim();
         if (iconEl) iconEl.className = visual.icon;
+    }
+
+    async function cargarHistorialRDS() {
+        const tbody = document.getElementById('history-table-body');
+        if (!tbody) return;
+
+        try {
+            const resp = await fetch(`${BASE_URL}/vehiculos/${ID_VEHICULO}/historial?_t=${Date.now()}`, { cache: 'no-store' });
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const data = await resp.json();
+            const registros = Array.isArray(data) ? data : (data.historial || data.datos || []);
+
+            if (registros.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="table-empty-msg">Sin movimientos individuales registrados aún en RDS.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = registros.slice(0, 10).map((item, index) => {
+                const cod = item.id_comando ?? item.codigo ?? '—';
+                const mov = item.comando || item.nombre_comando || item.movimiento || NOMBRES_COMANDOS[cod] || `Comando ${cod}`;
+                const orig = item.origen || 'WEB';
+                const visual = obtenerIconoMovimiento(cod, mov);
+                const rawFecha = item.fecha_hora || item.fecha || '';
+                let fechaStr = 'Hoy';
+                let horaStr = '—';
+
+                if (rawFecha) {
+                    const parsed = new Date(rawFecha);
+                    if (!isNaN(parsed)) {
+                        fechaStr = parsed.toLocaleDateString('es-MX');
+                        horaStr = parsed.toLocaleTimeString('es-MX');
+                    } else {
+                        fechaStr = rawFecha;
+                    }
+                }
+
+                if (index === 0) {
+                    actualizarPanelUltimoMovimiento(cod, mov, orig, fechaStr, horaStr);
+                }
+
+                return `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><i class="${visual.icon} text-amber" style="vertical-align: middle; margin-right: 4px;"></i><strong>${mov}</strong></td>
+                    <td>${orig}</td>
+                    <td>${fechaStr}</td>
+                    <td>${horaStr}</td>
+                </tr>
+            `;
+            }).join('');
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="5" class="table-empty-msg">No se pudo leer el historial de RDS (${err.message}).</td></tr>`;
+        }
     }
 
     async function cargarHistorialRDS() {
@@ -346,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         actualizarPanelUltimoMovimiento(cmdNum, etiqueta, payload.origen || 'WSS');
                         cargarHistorialRDS();
                     }
-                } catch (_) {}
+                } catch (_) { }
             };
 
             socket.onerror = () => {
