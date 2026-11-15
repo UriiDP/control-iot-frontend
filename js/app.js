@@ -21,8 +21,17 @@ document.addEventListener('DOMContentLoaded', () => {
         21: 'SONIDO'
     };
 
+    function normalizarIdComando(rawCodigo) {
+        if (rawCodigo === null || rawCodigo === undefined || rawCodigo === '') return null;
+        const num = Number(rawCodigo);
+        if (isNaN(num)) return null;
+        // Convierte códigos 101..111 de RDS a sus IDs reales 11..21
+        if (num >= 101 && num <= 111) return num - 90;
+        return num;
+    }
+
     function obtenerIconoMovimiento(codigo, texto = '') {
-        const c = Number(codigo);
+        const c = normalizarIdComando(codigo);
         const upper = String(texto).toUpperCase();
 
         if (c === 11 || upper.includes('AVANZAR')) {
@@ -210,20 +219,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     return `<option value="${id}">${nombre}</option>`;
                 }).join('');
             }
-        } catch (_) { }
+        } catch (_) {}
     }
 
     // =========================================================
-    // 3. PESTAÑA DE MONITOREO E HISTORIAL RDS CON ÍCONO DINÁMICO
+    // 3. PESTAÑA DE MONITOREO E HISTORIAL RDS (IDs 11 AL 21)
     // =========================================================
-    function normalizarIdComando(rawCodigo) {
-        const num = Number(rawCodigo);
-        if (isNaN(num)) return null;
-        // Convierte códigos 101..111 de RDS a sus IDs reales 11..21
-        if (num >= 101 && num <= 111) return num - 90;
-        return num;
-    }
-
     function actualizarPanelUltimoMovimiento(codigo, nombreAccion, origen = 'WEB', fechaCustom = null, horaCustom = null) {
         const now = new Date();
         const actionEl = document.getElementById('mon-last-action');
@@ -235,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const iconEl = document.getElementById('mon-action-icon');
 
         const idReal = normalizarIdComando(codigo);
-        const nombreLimpio = (nombreAccion || (idReal && NOMBRES_COMANDOS[idReal]) || `COMANDO #${idReal ?? codigo}`).toUpperCase();
+        const nombreLimpio = ((idReal !== null && NOMBRES_COMANDOS[idReal]) || nombreAccion || 'MOVIMIENTO').toUpperCase();
         const visual = obtenerIconoMovimiento(idReal ?? codigo, nombreLimpio);
 
         if (actionEl) actionEl.textContent = nombreLimpio;
@@ -266,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tbody.innerHTML = registros.slice(0, 10).map((item, index) => {
                 const rawCod = item.id_comando ?? item.codigo;
                 const idReal = normalizarIdComando(rawCod);
-                const nombre = item.comando || item.nombre || item.nombre_comando || (idReal && NOMBRES_COMANDOS[idReal]) || 'Movimiento';
+                const nombre = ((idReal !== null && NOMBRES_COMANDOS[idReal]) || item.comando || item.nombre || item.nombre_comando || 'MOVIMIENTO').toUpperCase();
                 const orig = item.origen || 'WEB';
                 const visual = obtenerIconoMovimiento(idReal ?? rawCod, nombre);
                 const rawFecha = item.fecha_hora || item.fecha || '';
@@ -293,114 +294,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <tr>
                         <td>${index + 1}</td>
                         <td><i class="${visual.icon} text-amber" style="vertical-align: middle; margin-right: 4px;"></i><strong>${etiquetaTabla}</strong></td>
-                        <td>${orig}</td>
-                        <td>${fechaStr}</td>
-                        <td>${horaStr}</td>
-                    </tr>
-                `;
-            }).join('');
-        } catch (err) {
-            tbody.innerHTML = `<tr><td colspan="5" class="table-empty-msg">No se pudo leer el historial de RDS (${err.message}).</td></tr>`;
-        }
-    }
-
-    document.getElementById('btn-reload-history')?.addEventListener('click', cargarHistorialRDS);
-
-    async function cargarHistorialRDS() {
-        const tbody = document.getElementById('history-table-body');
-        if (!tbody) return;
-
-        try {
-            const resp = await fetch(`${BASE_URL}/vehiculos/${ID_VEHICULO}/historial?_t=${Date.now()}`, { cache: 'no-store' });
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-            const data = await resp.json();
-            const registros = Array.isArray(data) ? data : (data.historial || data.datos || []);
-
-            if (registros.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="table-empty-msg">Sin movimientos individuales registrados aún en RDS.</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = registros.slice(0, 10).map((item, index) => {
-                const cod = item.id_comando ?? item.codigo ?? '—';
-                const mov = item.comando || item.nombre_comando || item.movimiento || NOMBRES_COMANDOS[cod] || `Comando ${cod}`;
-                const orig = item.origen || 'WEB';
-                const visual = obtenerIconoMovimiento(cod, mov);
-                const rawFecha = item.fecha_hora || item.fecha || '';
-                let fechaStr = 'Hoy';
-                let horaStr = '—';
-
-                if (rawFecha) {
-                    const parsed = new Date(rawFecha);
-                    if (!isNaN(parsed)) {
-                        fechaStr = parsed.toLocaleDateString('es-MX');
-                        horaStr = parsed.toLocaleTimeString('es-MX');
-                    } else {
-                        fechaStr = rawFecha;
-                    }
-                }
-
-                if (index === 0) {
-                    actualizarPanelUltimoMovimiento(cod, mov, orig, fechaStr, horaStr);
-                }
-
-                return `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td><i class="${visual.icon} text-amber" style="vertical-align: middle; margin-right: 4px;"></i><strong>${mov}</strong></td>
-                    <td>${orig}</td>
-                    <td>${fechaStr}</td>
-                    <td>${horaStr}</td>
-                </tr>
-            `;
-            }).join('');
-        } catch (err) {
-            tbody.innerHTML = `<tr><td colspan="5" class="table-empty-msg">No se pudo leer el historial de RDS (${err.message}).</td></tr>`;
-        }
-    }
-
-    async function cargarHistorialRDS() {
-        const tbody = document.getElementById('history-table-body');
-        if (!tbody) return;
-
-        try {
-            const resp = await fetch(`${BASE_URL}/vehiculos/${ID_VEHICULO}/historial?_t=${Date.now()}`, { cache: 'no-store' });
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-            const data = await resp.json();
-            const registros = Array.isArray(data) ? data : (data.historial || data.datos || []);
-
-            if (registros.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="table-empty-msg">Sin movimientos individuales registrados aún en RDS.</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = registros.slice(0, 10).map((item, index) => {
-                const cod = item.id_comando ?? item.codigo ?? '—';
-                const mov = item.nombre_comando || item.movimiento || NOMBRES_COMANDOS[cod] || `Comando ${cod}`;
-                const orig = item.origen || 'WEB';
-                const visual = obtenerIconoMovimiento(cod, mov);
-                const rawFecha = item.fecha_hora || item.fecha || '';
-                let fechaStr = 'Hoy';
-                let horaStr = '—';
-
-                if (rawFecha) {
-                    const parsed = new Date(rawFecha.endsWith('Z') ? rawFecha : `${rawFecha}Z`);
-                    if (!isNaN(parsed)) {
-                        fechaStr = parsed.toLocaleDateString('es-MX');
-                        horaStr = parsed.toLocaleTimeString('es-MX');
-                    } else {
-                        fechaStr = rawFecha;
-                    }
-                }
-
-                if (index === 0) {
-                    actualizarPanelUltimoMovimiento(cod, mov, orig);
-                }
-
-                return `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td><i class="${visual.icon} text-amber" style="vertical-align: middle; margin-right: 4px;"></i><strong>${mov}</strong></td>
                         <td>${orig}</td>
                         <td>${fechaStr}</td>
                         <td>${horaStr}</td>
@@ -458,7 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     const payload = JSON.parse(event.data);
                     if (payload && payload.id_comando !== undefined) {
-                        const cmdNum = Number(payload.id_comando);
+                        const cmdNum = normalizarIdComando(payload.id_comando);
                         const etiqueta = NOMBRES_COMANDOS[cmdNum] || `CMD ${cmdNum}`;
                         sim3D.aplicarComando(cmdNum, etiqueta);
                         if (hudState) hudState.textContent = etiqueta;
@@ -466,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         actualizarPanelUltimoMovimiento(cmdNum, etiqueta, payload.origen || 'WSS');
                         cargarHistorialRDS();
                     }
-                } catch (_) { }
+                } catch (_) {}
             };
 
             socket.onerror = () => {
@@ -505,13 +398,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // 5. ENVÍO DE COMANDOS A FASTAPI + SIMULACIÓN 3D
     // =========================================================
     async function enviarComando(idComando, etiquetaPersonalizada = null, origen = 'WEB') {
-        const cmdNum = Number(idComando);
-        const etiqueta = etiquetaPersonalizada || NOMBRES_COMANDOS[cmdNum] || `CMD ${cmdNum}`;
+        const cmdNum = normalizarIdComando(idComando);
+        const etiqueta = NOMBRES_COMANDOS[cmdNum] || etiquetaPersonalizada || `CMD ${cmdNum}`;
 
         sim3D.aplicarComando(cmdNum, etiqueta);
         if (hudState) hudState.textContent = etiqueta;
         if (directionBadge) directionBadge.textContent = etiqueta;
-        registrarEvento(`Comando [${cmdNum}]: ${etiqueta}`);
+        registrarEvento(`Comando [#${cmdNum}]: ${etiqueta}`);
         actualizarPanelUltimoMovimiento(cmdNum, etiqueta, origen);
 
         try {
@@ -567,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Botón Stop / Enc-Apag (ID 20 real de RDS)
     document.getElementById('btn-stop')?.addEventListener('click', () => {
-        enviarComando(20, 'ENC/APAG (STOP)', 'STOP_WEB');
+        enviarComando(20, 'ENC/APAG', 'STOP_WEB');
     });
 
     const btnRunSeq = document.getElementById('btn-run-sequence');
@@ -644,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         else if (texto.includes('bajar') || texto.includes('abajo')) enviarComando(18, 'BAJAR GARRA', 'VOZ_IA');
                         else if (texto.includes('velocidad')) enviarComando(19, 'VELOCIDAD', 'VOZ_IA');
                         else if (texto.includes('sonido') || texto.includes('claxon') || texto.includes('pita')) enviarComando(21, 'SONIDO', 'VOZ_IA');
-                        else if (texto.includes('detener') || texto.includes('alto') || texto.includes('stop') || texto.includes('apagar')) enviarComando(20, 'ENC/APAG (STOP)', 'VOZ_IA');
+                        else if (texto.includes('detener') || texto.includes('alto') || texto.includes('stop') || texto.includes('apagar')) enviarComando(20, 'ENC/APAG', 'VOZ_IA');
                     }
                 };
 
