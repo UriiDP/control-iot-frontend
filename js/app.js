@@ -216,6 +216,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================
     // 3. PESTAÑA DE MONITOREO E HISTORIAL RDS CON ÍCONO DINÁMICO
     // =========================================================
+    function normalizarIdComando(rawCodigo) {
+        const num = Number(rawCodigo);
+        if (isNaN(num)) return null;
+        // Convierte códigos 101..111 de RDS a sus IDs reales 11..21
+        if (num >= 101 && num <= 111) return num - 90;
+        return num;
+    }
+
     function actualizarPanelUltimoMovimiento(codigo, nombreAccion, origen = 'WEB', fechaCustom = null, horaCustom = null) {
         const now = new Date();
         const actionEl = document.getElementById('mon-last-action');
@@ -226,11 +234,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const iconBox = document.getElementById('mon-action-icon-box');
         const iconEl = document.getElementById('mon-action-icon');
 
-        const etiquetaFinal = nombreAccion || NOMBRES_COMANDOS[codigo] || `COMANDO #${codigo}`;
-        const visual = obtenerIconoMovimiento(codigo, etiquetaFinal);
+        const idReal = normalizarIdComando(codigo);
+        const nombreLimpio = (nombreAccion || (idReal && NOMBRES_COMANDOS[idReal]) || `COMANDO #${idReal ?? codigo}`).toUpperCase();
+        const visual = obtenerIconoMovimiento(idReal ?? codigo, nombreLimpio);
 
-        if (actionEl) actionEl.textContent = etiquetaFinal;
-        if (codeEl) codeEl.textContent = codigo !== undefined && codigo !== '—' ? `#${codigo}` : '—';
+        if (actionEl) actionEl.textContent = nombreLimpio;
+        if (codeEl) codeEl.textContent = idReal !== null ? `#${idReal}` : '—';
         if (dateEl) dateEl.textContent = fechaCustom || now.toLocaleDateString('es-MX');
         if (timeEl) timeEl.textContent = horaCustom || now.toLocaleTimeString('es-MX');
         if (originEl) originEl.textContent = `Origen: ${origen} • Sincronizado con RDS`;
@@ -238,6 +247,64 @@ document.addEventListener('DOMContentLoaded', () => {
         if (iconBox) iconBox.className = `pulse-wave-icon ${visual.theme}`.trim();
         if (iconEl) iconEl.className = visual.icon;
     }
+
+    async function cargarHistorialRDS() {
+        const tbody = document.getElementById('history-table-body');
+        if (!tbody) return;
+
+        try {
+            const resp = await fetch(`${BASE_URL}/vehiculos/${ID_VEHICULO}/historial?_t=${Date.now()}`, { cache: 'no-store' });
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const data = await resp.json();
+            const registros = Array.isArray(data) ? data : (data.historial || data.datos || []);
+
+            if (registros.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="table-empty-msg">Sin movimientos individuales registrados aún en RDS.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = registros.slice(0, 10).map((item, index) => {
+                const rawCod = item.id_comando ?? item.codigo;
+                const idReal = normalizarIdComando(rawCod);
+                const nombre = item.comando || item.nombre || item.nombre_comando || (idReal && NOMBRES_COMANDOS[idReal]) || 'Movimiento';
+                const orig = item.origen || 'WEB';
+                const visual = obtenerIconoMovimiento(idReal ?? rawCod, nombre);
+                const rawFecha = item.fecha_hora || item.fecha || '';
+                let fechaStr = 'Hoy';
+                let horaStr = '—';
+
+                if (rawFecha) {
+                    const parsed = new Date(rawFecha);
+                    if (!isNaN(parsed)) {
+                        fechaStr = parsed.toLocaleDateString('es-MX');
+                        horaStr = parsed.toLocaleTimeString('es-MX');
+                    } else {
+                        fechaStr = rawFecha;
+                    }
+                }
+
+                if (index === 0) {
+                    actualizarPanelUltimoMovimiento(idReal, nombre, orig, fechaStr, horaStr);
+                }
+
+                const etiquetaTabla = idReal !== null ? `#${idReal} • ${nombre}` : nombre;
+
+                return `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><i class="${visual.icon} text-amber" style="vertical-align: middle; margin-right: 4px;"></i><strong>${etiquetaTabla}</strong></td>
+                        <td>${orig}</td>
+                        <td>${fechaStr}</td>
+                        <td>${horaStr}</td>
+                    </tr>
+                `;
+            }).join('');
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="5" class="table-empty-msg">No se pudo leer el historial de RDS (${err.message}).</td></tr>`;
+        }
+    }
+
+    document.getElementById('btn-reload-history')?.addEventListener('click', cargarHistorialRDS);
 
     async function cargarHistorialRDS() {
         const tbody = document.getElementById('history-table-body');
