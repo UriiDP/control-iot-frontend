@@ -519,25 +519,45 @@ document.addEventListener('DOMContentLoaded', () => {
                     voiceTranscriptText.textContent = 'Habla ahora...';
                 };
 
-                recognition.onresult = (event) => {
+                recognition.onresult = async (event) => {
                     const texto = Array.from(event.results)
                         .map((r) => r[0].transcript)
-                        .join('')
-                        .toLowerCase();
+                        .join('');
                     voiceTranscriptText.textContent = `"${texto}"`;
 
                     if (event.results[0].isFinal) {
-                        if (texto.includes('avanza') || texto.includes('adelante')) enviarComando(11, 'AVANZAR', 'VOZ_IA');
-                        else if (texto.includes('retrocede') || texto.includes('atrás')) enviarComando(12, 'RETROCEDER', 'VOZ_IA');
-                        else if (texto.includes('cabina izquierda')) enviarComando(15, 'GIRA CABINA IZQUIERDA', 'VOZ_IA');
-                        else if (texto.includes('cabina derecha')) enviarComando(16, 'GIRA CABINA DERECHA', 'VOZ_IA');
-                        else if (texto.includes('izquierda')) enviarComando(13, 'GIRAR IZQUIERDA', 'VOZ_IA');
-                        else if (texto.includes('derecha')) enviarComando(14, 'GIRAR DERECHA', 'VOZ_IA');
-                        else if (texto.includes('subir') || texto.includes('elevar') || texto.includes('arriba')) enviarComando(17, 'ELEVAR GARRA', 'VOZ_IA');
-                        else if (texto.includes('bajar') || texto.includes('abajo')) enviarComando(18, 'BAJAR GARRA', 'VOZ_IA');
-                        else if (texto.includes('velocidad')) enviarComando(19, 'VELOCIDAD', 'VOZ_IA');
-                        else if (texto.includes('sonido') || texto.includes('claxon') || texto.includes('pita')) enviarComando(21, 'SONIDO', 'VOZ_IA');
-                        else if (texto.includes('detener') || texto.includes('alto') || texto.includes('stop') || texto.includes('apagar')) enviarComando(20, 'ENC/APAG', 'VOZ_IA');
+                        voiceStatusLabel.textContent = 'Interpretando con IA OpenAI...';
+                        try {
+                            const resp = await fetch(`${BASE_URL}/ia/interpretar-voz`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    texto: texto,
+                                    id_vehiculo: ID_VEHICULO
+                                })
+                            });
+
+                            const data = await resp.json();
+
+                            if (resp.ok && data.id_comando) {
+                                const etiqueta = data.comando || `CMD ${data.id_comando}`;
+                                sim3D.aplicarComando(etiqueta);
+                                if (hudState) hudState.textContent = etiqueta;
+                                if (directionBadge) directionBadge.textContent = etiqueta;
+                                if (typeof actualizarPanelUltimoMovimiento === 'function') {
+                                    actualizarPanelUltimoMovimiento(data.id_comando, etiqueta, 'VOZ_IA');
+                                }
+                                voiceTranscriptText.textContent = `"${texto}" → 🤖 ${data.respuesta}`;
+                                registrarEvento(`IA Voz [${data.id_comando}]: ${etiqueta} (${data.respuesta})`);
+                            } else {
+                                const aviso = data.respuesta || data.detail || 'No se reconoció una acción válida';
+                                voiceTranscriptText.textContent = `"${texto}" → 🤖 ${aviso}`;
+                                registrarEvento(`IA Voz: ${aviso}`);
+                            }
+                        } catch (err) {
+                            voiceTranscriptText.textContent = `"${texto}" → Error de conexión con IA`;
+                            registrarEvento('Error al conectar con /ia/interpretar-voz en EC2.');
+                        }
                     }
                 };
 
