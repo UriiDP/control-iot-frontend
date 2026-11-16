@@ -480,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =========================================================
-    // 6. PERMISOS REALES DE MICRÓFONO Y RECONOCIMIENTO DE VOZ IA
+    // 6. RECONOCIMIENTO DE VOZ EN VIVO + ENVÍO A OPENAI (EC2)
     // =========================================================
     const btnVoiceMic = document.getElementById('btn-voice-mic');
     const micWrapper = document.getElementById('mic-orb-wrapper');
@@ -488,93 +488,125 @@ document.addEventListener('DOMContentLoaded', () => {
     const voiceTranscriptText = document.getElementById('voice-transcript-text');
     let recognition = null;
     let isListening = false;
+    let textoCapturado = '';
+    let comandoEnviado = false;
+
+    async function procesarTextoConIA(textoFinal) {
+        const frase = textoFinal.trim();
+        if (!frase || comandoEnviado) return;
+        comandoEnviado = true;
+
+        voiceStatusLabel.textContent = 'Interpretando con IA OpenAI...';
+        try {
+            const resp = await fetch(`${BASE_URL}/ia/interpretar-voz`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    texto: frase,
+                    id_vehiculo: ID_VEHICULO
+                })
+            });
+
+            const data = await resp.json();
+
+            if (resp.ok && data.id_comando) {
+                const etiqueta = data.comando || `CMD ${data.id_comando}`;
+                sim3D.aplicarComando(etiqueta);
+                if (hudState) hudState.textContent = etiqueta;
+                if (directionBadge) directionBadge.textContent = etiqueta;
+                if (typeof actualizarPanelUltimoMovimiento === 'function') {
+                    actualizarPanelUltimoMovimiento(data.id_comando, etiqueta, 'VOZ_IA');
+                }
+                voiceTranscriptText.textContent = `"${frase}" → 🤖 ${data.respuesta}`;
+                registrarEvento(`IA Voz [${data.id_comando}]: ${etiqueta} (${data.respuesta})`);
+            } else {
+                const aviso = data.respuesta || data.detail || 'No se reconoció una acción válida';
+                voiceTranscriptText.textContent = `"${frase}" → 🤖 ${aviso}`;
+                registrarEvento(`IA Voz: ${aviso}`);
+            }
+        } catch (err) {
+            voiceTranscriptText.textContent = `"${frase}" → Error de conexión con IA`;
+            registrarEvento('Error al conectar con /ia/interpretar-voz en EC2.');
+        } finally {
+            voiceStatusLabel.textContent = 'Micrófono listo • Toca para hablar de nuevo';
+        }
+    }
 
     if (btnVoiceMic) {
-        btnVoiceMic.addEventListener('click', async () => {
+        btnVoiceMic.addEventListener('click', () => {
             if (isListening && recognition) {
                 recognition.stop();
                 return;
             }
 
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                stream.getTracks().forEach((track) => track.stop());
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRec) {
+                voiceStatusLabel.textContent = 'Navegador no compatible con voz';
+                voiceTranscriptText.textContent = 'Usa Google Chrome o Microsoft Edge para dictar comandos.';
+                return;
+            }
 
-                const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-                if (!SpeechRec) {
-                    voiceStatusLabel.textContent = 'Permiso concedido • API de voz no soportada en este navegador';
-                    voiceTranscriptText.textContent = 'Tu micrófono tiene permiso, pero usa Chrome/Edge/Safari actualizado para transcribir.';
-                    return;
+            textoCapturado = '';
+            comandoEnviado = false;
+
+            recognition = new SpeechRec();
+            recognition.lang = 'es-MX';
+            recognition.continuous = false;
+            recognition.interimResults = true;
+
+            // Activar animación roja de inmediato dentro del toque del usuario
+            isListening = true;
+            micWrapper?.classList.add('listening');
+            voiceStatusLabel.textContent = 'Escuchando en vivo...';
+            voiceTranscriptText.textContent = 'Habla ahora...';
+
+            recognition.onresult = (event) => {
+                let transcripcion = '';
+                let esFinal = false;
+
+                for (let i = 0; i < event.results.length; i++) {
+                    transcripcion += event.results[i][0].transcript;
+                    if (event.results[i].isFinal) esFinal = true;
                 }
 
-                recognition = new SpeechRec();
-                recognition.lang = 'es-MX';
-                recognition.continuous = false;
-                recognition.interimResults = true;
+                textoCapturado = transcripcion.trim();
+                if (textoCapturado) {
+                    voiceTranscriptText.textContent = `"${textoCapturado}"`;
+                }
 
-                recognition.onstart = () => {
-                    isListening = true;
-                    micWrapper?.classList.add('listening');
-                    voiceStatusLabel.textContent = 'Escuchando en vivo...';
-                    voiceTranscriptText.textContent = 'Habla ahora...';
-                };
+                if (esFinal && textoCapturado) {
+                    procesarTextoConIA(textoCapturado);
+                }
+            };
 
-                recognition.onresult = async (event) => {
-                    const texto = Array.from(event.results)
-                        .map((r) => r[0].transcript)
-                        .join('');
-                    voiceTranscriptText.textContent = `"${texto}"`;
-
-                    if (event.results[0].isFinal) {
-                        voiceStatusLabel.textContent = 'Interpretando con IA OpenAI...';
-                        try {
-                            const resp = await fetch(`${BASE_URL}/ia/interpretar-voz`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    texto: texto,
-                                    id_vehiculo: ID_VEHICULO
-                                })
-                            });
-
-                            const data = await resp.json();
-
-                            if (resp.ok && data.id_comando) {
-                                const etiqueta = data.comando || `CMD ${data.id_comando}`;
-                                sim3D.aplicarComando(etiqueta);
-                                if (hudState) hudState.textContent = etiqueta;
-                                if (directionBadge) directionBadge.textContent = etiqueta;
-                                if (typeof actualizarPanelUltimoMovimiento === 'function') {
-                                    actualizarPanelUltimoMovimiento(data.id_comando, etiqueta, 'VOZ_IA');
-                                }
-                                voiceTranscriptText.textContent = `"${texto}" → 🤖 ${data.respuesta}`;
-                                registrarEvento(`IA Voz [${data.id_comando}]: ${etiqueta} (${data.respuesta})`);
-                            } else {
-                                const aviso = data.respuesta || data.detail || 'No se reconoció una acción válida';
-                                voiceTranscriptText.textContent = `"${texto}" → 🤖 ${aviso}`;
-                                registrarEvento(`IA Voz: ${aviso}`);
-                            }
-                        } catch (err) {
-                            voiceTranscriptText.textContent = `"${texto}" → Error de conexión con IA`;
-                            registrarEvento('Error al conectar con /ia/interpretar-voz en EC2.');
-                        }
-                    }
-                };
-
-                recognition.onerror = (e) => {
+            recognition.onerror = (e) => {
+                isListening = false;
+                micWrapper?.classList.remove('listening');
+                if (e.error === 'no-speech') {
+                    voiceStatusLabel.textContent = 'No se escuchó voz • Revisa tu micrófono';
+                } else if (e.error === 'not-allowed') {
+                    voiceStatusLabel.textContent = 'Permiso de micrófono bloqueado en el navegador';
+                } else {
                     voiceStatusLabel.textContent = `Aviso de voz: ${e.error}`;
-                };
+                }
+            };
 
-                recognition.onend = () => {
-                    isListening = false;
-                    micWrapper?.classList.remove('listening');
+            recognition.onend = () => {
+                isListening = false;
+                micWrapper?.classList.remove('listening');
+                if (textoCapturado && !comandoEnviado) {
+                    procesarTextoConIA(textoCapturado);
+                } else if (!comandoEnviado) {
                     voiceStatusLabel.textContent = 'Micrófono listo • Toca para hablar de nuevo';
-                };
+                }
+            };
 
+            try {
                 recognition.start();
             } catch (err) {
-                voiceStatusLabel.textContent = 'Permiso de micrófono denegado o bloqueado';
-                voiceTranscriptText.textContent = 'Habilita el acceso al micrófono en los ajustes de tu navegador.';
+                isListening = false;
+                micWrapper?.classList.remove('listening');
+                voiceStatusLabel.textContent = 'Error al iniciar el micrófono';
             }
         });
     }
