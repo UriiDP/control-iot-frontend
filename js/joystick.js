@@ -1,14 +1,8 @@
 /* ==========================================================================
-   Módulo Joystick Virtual (Pointer Events Táctil / Mouse)
+   Módulo Joystick Virtual (Pointer Events Táctil / Mouse - Movimiento Continuo)
    ========================================================================== */
 
 export class JoystickController {
-  /**
-   * @param {HTMLElement} zoneElement Elemento contenedor del joystick (#joystick-zone)
-   * @param {HTMLElement} knobElement Elemento perilla del joystick (#joystick-knob)
-   * @param {Function} onCommandCallback Callback emitido al cambiar dirección/comando (idComando)
-   * @param {Function} onStatusCallback Callback para actualizar el texto visual de dirección
-   */
   constructor(zoneElement, knobElement, onCommandCallback, onStatusCallback) {
     this.zone = zoneElement;
     this.knob = knobElement;
@@ -18,14 +12,14 @@ export class JoystickController {
     this.activePointerId = null;
     this.isDragging = false;
     this.currentCommand = 0;
+    this.holdInterval = null;
 
-    // Mapeo de comandos de dirección según el catálogo real en Amazon RDS
     this.COMMANDS = {
       NEUTRAL: 0,
       AVANZAR: 11,
       RETROCEDER: 12,
-      GIRAR_IZQUIERDA: 13,
-      GIRAR_DERECHA: 14
+      IZQUIERDA: 13,
+      DERECHA: 14
     };
 
     this.initEvents();
@@ -34,6 +28,7 @@ export class JoystickController {
   initEvents() {
     if (!this.zone || !this.knob) return;
 
+    this.zone.style.touchAction = 'none';
     this.zone.addEventListener('pointerdown', (e) => this.onPointerDown(e));
     window.addEventListener('pointermove', (e) => this.onPointerMove(e));
     window.addEventListener('pointerup', (e) => this.onPointerUp(e));
@@ -42,21 +37,23 @@ export class JoystickController {
 
   onPointerDown(e) {
     if (this.isDragging) return;
+    e.preventDefault();
     this.isDragging = true;
     this.activePointerId = e.pointerId;
-    this.zone.setPointerCapture(e.pointerId);
+    this.zone.setPointerCapture?.(e.pointerId);
     this.updatePosition(e);
   }
 
   onPointerMove(e) {
     if (!this.isDragging || e.pointerId !== this.activePointerId) return;
+    e.preventDefault();
     this.updatePosition(e);
   }
 
   onPointerUp(e) {
     if (!this.isDragging || (e && e.pointerId !== this.activePointerId)) return;
     this.isDragging = false;
-    if (this.activePointerId !== null && this.zone.hasPointerCapture(this.activePointerId)) {
+    if (this.activePointerId !== null && this.zone.hasPointerCapture?.(this.activePointerId)) {
       this.zone.releasePointerCapture(this.activePointerId);
     }
     this.activePointerId = null;
@@ -67,7 +64,6 @@ export class JoystickController {
     const rect = this.zone.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-
     const maxRadius = (rect.width / 2) - 15;
 
     let deltaX = e.clientX - centerX;
@@ -100,28 +96,51 @@ export class JoystickController {
       nuevoComando = this.COMMANDS.AVANZAR;
       etiqueta = 'AVANZAR';
     } else if (angleDeg >= -45 && angleDeg < 45) {
-      nuevoComando = this.COMMANDS.GIRAR_DERECHA;
-      etiqueta = 'GIRAR DERECHA';
+      nuevoComando = this.COMMANDS.DERECHA;
+      etiqueta = 'DERECHA';
     } else if (angleDeg >= 45 && angleDeg < 135) {
       nuevoComando = this.COMMANDS.RETROCEDER;
       etiqueta = 'RETROCEDER';
     } else {
-      nuevoComando = this.COMMANDS.GIRAR_IZQUIERDA;
-      etiqueta = 'GIRAR IZQUIERDA';
+      nuevoComando = this.COMMANDS.IZQUIERDA;
+      etiqueta = 'IZQUIERDA';
     }
 
     this.setCommand(nuevoComando, etiqueta);
   }
 
+  detenerRepeticion() {
+    if (this.holdInterval) {
+      clearInterval(this.holdInterval);
+      this.holdInterval = null;
+    }
+  }
+
   setCommand(comando, etiqueta) {
     if (this.currentCommand !== comando) {
       this.currentCommand = comando;
+      this.detenerRepeticion();
+
       if (this.onStatusCallback) this.onStatusCallback(etiqueta);
-      if (this.onCommandCallback) this.onCommandCallback(comando);
+
+      if (comando !== this.COMMANDS.NEUTRAL && this.onCommandCallback) {
+        // Envío inmediato al entrar en la dirección
+        this.onCommandCallback(comando);
+
+        // Reenvío continuo cada 750ms mientras siga deslizado
+        this.holdInterval = setInterval(() => {
+          if (this.isDragging && this.currentCommand === comando) {
+            this.onCommandCallback(comando);
+          } else {
+            this.detenerRepeticion();
+          }
+        }, 750);
+      }
     }
   }
 
   resetKnob() {
+    this.detenerRepeticion();
     this.knob.style.transform = 'translate(-50%, -50%)';
     this.setCommand(this.COMMANDS.NEUTRAL, 'NEUTRAL');
   }

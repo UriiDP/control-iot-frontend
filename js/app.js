@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return `<option value="${id}">${nombre}</option>`;
                 }).join('');
             }
-        } catch (_) {}
+        } catch (_) { }
     }
 
     // =========================================================
@@ -359,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         actualizarPanelUltimoMovimiento(cmdNum, etiqueta, payload.origen || 'WSS');
                         cargarHistorialRDS();
                     }
-                } catch (_) {}
+                } catch (_) { }
             };
 
             socket.onerror = () => {
@@ -450,12 +450,36 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-    // Botones de Actuadores (11, 12, 15, 16, 17, 18, 19, 21)
+    // Botones de actuadores (soporta toque corto y mantener pulsado en PC y móvil)
     document.querySelectorAll('.actuator-btn').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            const cmdId = Number(btn.dataset.cmd);
-            enviarComando(cmdId, NOMBRES_COMANDOS[cmdId] || btn.dataset.label, 'BOTON_WEB');
-        });
+        let btnHoldTimer = null;
+        btn.style.touchAction = 'none';
+
+        const iniciarPulsacion = (e) => {
+            e.preventDefault();
+            if (btnHoldTimer) return;
+            const cmd = btn.dataset.cmd;
+            const label = btn.dataset.label;
+
+            enviarComando(cmd, label);
+            btnHoldTimer = setInterval(() => {
+                enviarComando(cmd, label);
+            }, 750);
+        };
+
+        const terminarPulsacion = () => {
+            if (btnHoldTimer) {
+                clearInterval(btnHoldTimer);
+                btnHoldTimer = null;
+                sim3D.aplicarComando('NEUTRAL');
+                if (hudState) hudState.textContent = 'NEUTRAL';
+            }
+        };
+
+        btn.addEventListener('pointerdown', iniciarPulsacion);
+        btn.addEventListener('pointerup', terminarPulsacion);
+        btn.addEventListener('pointerleave', terminarPulsacion);
+        btn.addEventListener('pointercancel', terminarPulsacion);
     });
 
     // Botón Stop / Enc-Apag (ID 20 real de RDS)
