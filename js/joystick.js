@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Módulo Joystick Virtual (Pointer Events Táctil / Mouse - Movimiento Continuo)
+   Módulo Joystick Virtual (Pointer Events Táctil / Mouse - Inicio/Parada Instantánea)
    ========================================================================== */
 
 export class JoystickController {
@@ -12,7 +12,6 @@ export class JoystickController {
     this.activePointerId = null;
     this.isDragging = false;
     this.currentCommand = 0;
-    this.holdInterval = null;
 
     this.COMMANDS = {
       NEUTRAL: 0,
@@ -33,6 +32,10 @@ export class JoystickController {
     window.addEventListener('pointermove', (e) => this.onPointerMove(e));
     window.addEventListener('pointerup', (e) => this.onPointerUp(e));
     window.addEventListener('pointercancel', (e) => this.onPointerUp(e));
+    this.zone.addEventListener('lostpointercapture', () => this.forzarSoltado());
+    this.zone.addEventListener('touchend', () => this.forzarSoltado());
+    this.zone.addEventListener('touchcancel', () => this.forzarSoltado());
+    window.addEventListener('blur', () => this.forzarSoltado());
   }
 
   onPointerDown(e) {
@@ -40,7 +43,9 @@ export class JoystickController {
     e.preventDefault();
     this.isDragging = true;
     this.activePointerId = e.pointerId;
-    this.zone.setPointerCapture?.(e.pointerId);
+    try {
+      this.zone.setPointerCapture?.(e.pointerId);
+    } catch (_) {}
     this.updatePosition(e);
   }
 
@@ -50,14 +55,22 @@ export class JoystickController {
     this.updatePosition(e);
   }
 
-  onPointerUp(e) {
-    if (!this.isDragging || (e && e.pointerId !== this.activePointerId)) return;
+  forzarSoltado() {
+    if (!this.isDragging && this.currentCommand === this.COMMANDS.NEUTRAL) return;
     this.isDragging = false;
-    if (this.activePointerId !== null && this.zone.hasPointerCapture?.(this.activePointerId)) {
-      this.zone.releasePointerCapture(this.activePointerId);
-    }
     this.activePointerId = null;
     this.resetKnob();
+  }
+
+  onPointerUp(e) {
+    if (!this.isDragging) return;
+    if (e && this.activePointerId !== null && e.pointerId !== this.activePointerId) return;
+    if (this.activePointerId !== null && this.zone.hasPointerCapture?.(this.activePointerId)) {
+      try {
+        this.zone.releasePointerCapture(this.activePointerId);
+      } catch (_) {}
+    }
+    this.forzarSoltado();
   }
 
   updatePosition(e) {
@@ -109,38 +122,25 @@ export class JoystickController {
     this.setCommand(nuevoComando, etiqueta);
   }
 
-  detenerRepeticion() {
-    if (this.holdInterval) {
-      clearInterval(this.holdInterval);
-      this.holdInterval = null;
-    }
-  }
-
   setCommand(comando, etiqueta) {
     if (this.currentCommand !== comando) {
+      const comandoAnterior = this.currentCommand;
       this.currentCommand = comando;
-      this.detenerRepeticion();
 
       if (this.onStatusCallback) this.onStatusCallback(etiqueta);
 
-      if (comando !== this.COMMANDS.NEUTRAL && this.onCommandCallback) {
-        // Envío inmediato al entrar en la dirección
-        this.onCommandCallback(comando);
-
-        // Reenvío continuo cada 750ms mientras siga deslizado
-        this.holdInterval = setInterval(() => {
-          if (this.isDragging && this.currentCommand === comando) {
-            this.onCommandCallback(comando);
-          } else {
-            this.detenerRepeticion();
-          }
-        }, 750);
+      if (this.onCommandCallback) {
+        if (comando !== this.COMMANDS.NEUTRAL) {
+          this.onCommandCallback(comando);
+        } else if (comandoAnterior !== this.COMMANDS.NEUTRAL) {
+          // Envía 1 solo STOP instantáneo al soltar o volver al centro
+          this.onCommandCallback(0);
+        }
       }
     }
   }
 
   resetKnob() {
-    this.detenerRepeticion();
     this.knob.style.transform = 'translate(-50%, -50%)';
     this.setCommand(this.COMMANDS.NEUTRAL, 'NEUTRAL');
   }
