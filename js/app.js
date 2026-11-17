@@ -450,30 +450,22 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-    // Botones de actuadores (soporta toque corto y mantener pulsado en PC y móvil)
+    // Botones de actuadores: 1 comando al presionar, 1 STOP instantáneo al soltar
     document.querySelectorAll('.actuator-btn').forEach((btn) => {
-        let btnHoldTimer = null;
+        let activo = false;
         btn.style.touchAction = 'none';
 
         const iniciarPulsacion = (e) => {
             e.preventDefault();
-            if (btnHoldTimer) return;
-            const cmd = btn.dataset.cmd;
-            const label = btn.dataset.label;
-
-            enviarComando(cmd, label);
-            btnHoldTimer = setInterval(() => {
-                enviarComando(cmd, label);
-            }, 750);
+            if (activo) return;
+            activo = true;
+            enviarComando(btn.dataset.cmd, btn.dataset.label, 'BOTON_WEB');
         };
 
         const terminarPulsacion = () => {
-            if (btnHoldTimer) {
-                clearInterval(btnHoldTimer);
-                btnHoldTimer = null;
-                sim3D.aplicarComando('NEUTRAL');
-                if (hudState) hudState.textContent = 'NEUTRAL';
-            }
+            if (!activo) return;
+            activo = false;
+            enviarComando(0, 'DETENER (STOP)', 'BOTON_WEB');
         };
 
         btn.addEventListener('pointerdown', iniciarPulsacion);
@@ -758,4 +750,23 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('iot-theme', next);
         if (themeIcon) themeIcon.className = next === 'light' ? 'bx bx-moon' : 'bx bx-sun';
     });
+
+    // =========================================================
+    // SECUENCIA DE IA DINÁMICA PARA ANIMACIÓN 3D Y AUDIO
+    // =========================================================
+    async function ejecutarSecuencia3D(pasos) {
+        for (const paso of pasos) {
+            const etiqueta = paso.comando || `CMD ${paso.id_comando}`;
+            sim3D.aplicarComando(etiqueta);
+            if (hudState) hudState.textContent = etiqueta;
+            if (directionBadge) directionBadge.textContent = etiqueta;
+            if (typeof actualizarPanelUltimoMovimiento === 'function') {
+                actualizarPanelUltimoMovimiento(paso.id_comando, etiqueta, 'VOZ_IA');
+            }
+            await new Promise((r) => setTimeout(r, (paso.duracion_ms || 800) + (paso.pausa_ms || 150)));
+        }
+        sim3D.aplicarComando('NEUTRAL');
+        if (hudState) hudState.textContent = 'NEUTRAL';
+        if (directionBadge) directionBadge.textContent = 'NEUTRAL';
+    }
 });
