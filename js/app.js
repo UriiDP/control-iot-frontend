@@ -496,17 +496,61 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =========================================================
-    // 6. RECONOCIMIENTO DE VOZ EN VIVO + ENVÍO A OPENAI (EC2)
+    // 6. RECONOCIMIENTO DE VOZ HÍBRIDO (PC EN VIVO + MÓVIL WHISPER)
     // =========================================================
     const btnVoiceMic = document.getElementById('btn-voice-mic');
     const micWrapper = document.getElementById('mic-orb-wrapper');
     const voiceStatusLabel = document.getElementById('voice-status-label');
     const voiceTranscriptText = document.getElementById('voice-transcript-text');
+
     let recognition = null;
     let isListening = false;
     let textoCapturado = '';
     let comandoEnviado = false;
 
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecordingMobile = false;
+    let autoStopTimer = null;
+
+    const esDispositivoMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    async function animarPasosEn3D(pasos) {
+        for (const paso of pasos) {
+            const etiqueta = paso.comando || `CMD ${paso.id_comando}`;
+            sim3D.aplicarComando(etiqueta);
+            if (hudState) hudState.textContent = etiqueta;
+            if (directionBadge) directionBadge.textContent = etiqueta;
+            if (typeof actualizarPanelUltimoMovimiento === 'function') {
+                actualizarPanelUltimoMovimiento(paso.id_comando, etiqueta, 'VOZ_IA');
+            }
+            await new Promise((r) => setTimeout(r, (paso.duracion_ms || 800) + (paso.pausa_ms || 150)));
+        }
+        sim3D.aplicarComando('NEUTRAL');
+        if (hudState) hudState.textContent = 'NEUTRAL';
+        if (directionBadge) directionBadge.textContent = 'NEUTRAL';
+    }
+
+    function manejarRespuestaIA(frase, data) {
+        const pasos = Array.isArray(data.pasos) ? data.pasos : [];
+
+        if (pasos.length > 0) {
+            voiceTranscriptText.textContent = `"${frase}" → 🤖 ${data.respuesta}`;
+            registrarEvento(`IA Voz [${pasos.length} paso${pasos.length > 1 ? 's' : ''}]: ${data.respuesta}`);
+            animarPasosEn3D(pasos);
+        } else if (data.id_comando) {
+            const etiqueta = data.comando || `CMD ${data.id_comando}`;
+            animarPasosEn3D([{ id_comando: data.id_comando, comando: etiqueta, duracion_ms: 1000, pausa_ms: 150 }]);
+            voiceTranscriptText.textContent = `"${frase}" → 🤖 ${data.respuesta}`;
+            registrarEvento(`IA Voz [${data.id_comando}]: ${etiqueta} (${data.respuesta})`);
+        } else {
+            const aviso = data.respuesta || data.detail || 'No se reconoció una acción válida';
+            voiceTranscriptText.textContent = `"${frase}" → 🤖 ${aviso}`;
+            registrarEvento(`IA Voz: ${aviso}`);
+        }
+    }
+
+    // --- MODO PC: Texto en vivo -> /ia/interpretar-voz ---
     async function procesarTextoConIA(textoFinal) {
         const frase = textoFinal.trim();
         if (!frase || comandoEnviado) return;
@@ -524,19 +568,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await resp.json();
-
-            if (resp.ok && data.id_comando) {
-                const etiqueta = data.comando || `CMD ${data.id_comando}`;
-                sim3D.aplicarComando(etiqueta);
-                if (hudState) hudState.textContent = etiqueta;
-                if (directionBadge) directionBadge.textContent = etiqueta;
-                if (typeof actualizarPanelUltimoMovimiento === 'function') {
-                    actualizarPanelUltimoMovimiento(data.id_comando, etiqueta, 'VOZ_IA');
-                }
-                voiceTranscriptText.textContent = `"${frase}" → 🤖 ${data.respuesta}`;
-                registrarEvento(`IA Voz [${data.id_comando}]: ${etiqueta} (${data.respuesta})`);
+            if (resp.ok) {
+                manejarRespuestaIA(frase, data);
             } else {
-                const aviso = data.respuesta || data.detail || 'No se reconoció una acción válida';
+                const aviso = data.detail || 'Error al procesar orden con IA';
                 voiceTranscriptText.textContent = `"${frase}" → 🤖 ${aviso}`;
                 registrarEvento(`IA Voz: ${aviso}`);
             }
@@ -548,17 +583,124 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- MODO MÓVIL: Grabación de audio -> /ia/interpretar-audio (Whisper) ---
+    async function enviarAudioAOpenAI(audioBlob, mimeType) {
+        voiceStatusLabel.textContent = 'Procesando voz con OpenAI...';
+        voiceTranscriptText.textContent = 'Analizando orden...';
+
+        try {
+            const base64Audio = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(audioBlob);
+            });
+
+            const resp = await fetch(`${BASE_URL}/ia/interpretar-audio`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    audio_base64: base64Audio,
+                    mime_type: mimeType || 'audio/mp4',
+                    id_vehiculo: ID_VEHICULO
+                })
+            });
+
+            const data = await resp.json();
+            const frase = data.texto || '(audio sin texto)';
+
+            if (resp.ok) {
+                manejarRespuestaIA(frase, data);
+            } else {
+                const aviso = data.detail || 'No se pudo interpretar el audio';
+                voiceTranscriptText.textContent = `"${frase}" → 🤖 ${aviso}`;
+                registrarEvento(`IA Voz: ${aviso}`);
+            }
+        } catch (err) {
+            voiceTranscriptText.textContent = 'Error de conexión con la IA en EC2';
+            registrarEvento('Error al enviar audio a /ia/interpretar-audio.');
+        } finally {
+            voiceStatusLabel.textContent = 'Micrófono listo • Toca para hablar de nuevo';
+        }
+    }
+
+    async function iniciarGrabacionMovil() {
+        if (isRecordingMobile && mediaRecorder && mediaRecorder.state === 'recording') {
+            clearTimeout(autoStopTimer);
+            mediaRecorder.stop();
+            return;
+        }
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
+            voiceStatusLabel.textContent = 'Grabación no disponible en este navegador';
+            voiceTranscriptText.textContent = 'Abre la página en Safari o Chrome actualizado.';
+            return;
+        }
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+            let options = undefined;
+            if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                options = { mimeType: 'audio/mp4' };
+            } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+                options = { mimeType: 'audio/webm' };
+            }
+
+            audioChunks = [];
+            mediaRecorder = options ? new MediaRecorder(stream, options) : new MediaRecorder(stream);
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data && e.data.size > 0) audioChunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                isRecordingMobile = false;
+                micWrapper?.classList.remove('listening');
+                stream.getTracks().forEach((t) => t.stop());
+
+                const tipoFinal = mediaRecorder.mimeType || (options && options.mimeType) || 'audio/mp4';
+                const blob = new Blob(audioChunks, { type: tipoFinal });
+
+                if (blob.size > 400) {
+                    enviarAudioAOpenAI(blob, tipoFinal);
+                } else {
+                    voiceStatusLabel.textContent = 'Audio muy corto • Intenta hablar más cerca';
+                }
+            };
+
+            mediaRecorder.start(250);
+            isRecordingMobile = true;
+            micWrapper?.classList.add('listening');
+            voiceStatusLabel.textContent = 'Escuchando en vivo... (toca para enviar)';
+            voiceTranscriptText.textContent = 'Habla ahora...';
+
+            autoStopTimer = setTimeout(() => {
+                if (isRecordingMobile && mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
+            }, 4500);
+        } catch (err) {
+            isRecordingMobile = false;
+            micWrapper?.classList.remove('listening');
+            voiceStatusLabel.textContent = 'Permiso de micrófono bloqueado';
+            voiceTranscriptText.textContent = 'Revisa los permisos de micrófono de tu navegador.';
+        }
+    }
+
     if (btnVoiceMic) {
         btnVoiceMic.addEventListener('click', () => {
-            if (isListening && recognition) {
-                recognition.stop();
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+            // En celulares o navegadores sin SpeechRecognition usa grabación de audio directa
+            if (esDispositivoMovil || !SpeechRec) {
+                iniciarGrabacionMovil();
                 return;
             }
 
-            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRec) {
-                voiceStatusLabel.textContent = 'Navegador no compatible con voz';
-                voiceTranscriptText.textContent = 'Usa Google Chrome o Microsoft Edge para dictar comandos.';
+            // En PC usa reconocimiento en tiempo real
+            if (isListening && recognition) {
+                recognition.stop();
                 return;
             }
 
@@ -570,7 +712,6 @@ document.addEventListener('DOMContentLoaded', () => {
             recognition.continuous = false;
             recognition.interimResults = true;
 
-            // Activar animación roja de inmediato dentro del toque del usuario
             isListening = true;
             micWrapper?.classList.add('listening');
             voiceStatusLabel.textContent = 'Escuchando en vivo...';
@@ -598,7 +739,9 @@ document.addEventListener('DOMContentLoaded', () => {
             recognition.onerror = (e) => {
                 isListening = false;
                 micWrapper?.classList.remove('listening');
-                if (e.error === 'no-speech') {
+                if (e.error === 'service-not-allowed') {
+                    iniciarGrabacionMovil();
+                } else if (e.error === 'no-speech') {
                     voiceStatusLabel.textContent = 'No se escuchó voz • Revisa tu micrófono';
                 } else if (e.error === 'not-allowed') {
                     voiceStatusLabel.textContent = 'Permiso de micrófono bloqueado en el navegador';
@@ -622,7 +765,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (err) {
                 isListening = false;
                 micWrapper?.classList.remove('listening');
-                voiceStatusLabel.textContent = 'Error al iniciar el micrófono';
+                iniciarGrabacionMovil();
             }
         });
     }
